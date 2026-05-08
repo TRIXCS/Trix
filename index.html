@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRIX Courier — Fast & Reliable Delivery</title>
+<!-- QR Code library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- SheetJS for Excel export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1a56db;--blue-dark:#1239a5;--blue-xdark:#0d2c8c;
+  --blue-light:#e8f0fe;--blue-mid:#b5d0f7;
+  --green:#0e9f6e;--green-light:#e8f5ee;
+  --amber:#c97a1a;--amber-light:#fef3e2;
+  --red:#e02424;--red-light:#fde8e8;
+  --purple:#6c3eb8;--purple-light:#f0ebff;
+  --gray:#6b7280;--gray-light:#f3f4f6;--gray-mid:#e5e7eb;
+  --white:#fff;--text:#111827;--muted:#6b7280;
+  --border:#e5e7eb;--shadow:0 2px 14px rgba(0,0,0,.07);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.12);
+  --radius:14px;--radius-sm:9px;--radius-xs:6px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;color:var(--text);background:#eef2fb;min-height:100vh;font-size:15px;line-height:1.6}
+h1,h2,h3,h4{font-family:'Sora',sans-serif}
+a{color:inherit;text-decoration:none}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:#f1f1f1}
+::-webkit-scrollbar-thumb{background:#c1c9d8;border-radius:4px}
+
+/* AUTH */
+.auth-screen{display:none;position:fixed;inset:0;background:linear-gradient(135deg,#0d2c8c 0%,#1a56db 50%,#1e6cf0 100%);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.auth-screen.active{display:flex}
+.auth-box{background:white;border-radius:20px;padding:36px 32px;width:100%;max-width:420px;box-shadow:0 24px 60px rgba(0,0,0,.25)}
+.auth-logo{text-align:center;margin-bottom:24px}
+.auth-logo .logo-mark{width:52px;height:52px;background:var(--blue);border-radius:14px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:10px}
+.auth-logo h2{font-size:22px;color:var(--text)}
+.auth-logo p{font-size:13px;color:var(--muted);margin-top:3px}
+.auth-tabs{display:flex;gap:4px;background:var(--gray-light);padding:4px;border-radius:var(--radius-sm);margin-bottom:22px}
+.auth-tab{flex:1;padding:8px;border:none;background:none;border-radius:var(--radius-xs);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--muted);transition:all .15s}
+.auth-tab.active{background:white;color:var(--blue);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.auth-form{display:none}
+.auth-form.active{display:block}
+.auth-field{margin-bottom:14px}
+.auth-field label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+.auth-field input{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border .15s;color:var(--text)}
+.auth-field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
+.auth-btn{width:100%;padding:12px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);font-family:'Sora',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:background .15s;margin-top:4px}
+.auth-btn:hover{background:var(--blue-dark)}
+.auth-err{color:var(--red);font-size:13px;margin-top:8px;text-align:center;display:none}
+.admin-login-link{text-align:center;margin-top:14px}
+.admin-login-link a{font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline}
+
+/* APP SHELL */
+#app{display:none}
+#app.active{display:block}
+
+/* NAV */
+nav{background:white;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:99;box-shadow:0 1px 8px rgba(0,0,0,.06)}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:58px;gap:12px}
+.nav-logo{display:flex;align-items:center;gap:9px;cursor:pointer;flex-shrink:0}
+.logo-box{width:32px;height:32px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center}
+.logo-box svg{width:20px;height:20px}
+.logo-text{font-family:'Sora',sans-serif;font-weight:800;font-size:18px;color:var(--blue);letter-spacing:-.5px}
+.nav-links{display:flex;gap:2px;flex-wrap:wrap}
+.nav-link{background:none;border:none;padding:7px 13px;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--muted);font-weight:500;transition:all .15s;white-space:nowrap}
+.nav-link:hover,.nav-link.active{background:var(--blue-light);color:var(--blue)}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.user-chip{display:flex;align-items:center;gap:7px;background:var(--gray-light);border-radius:20px;padding:5px 12px 5px 6px;font-size:13px}
+.user-avatar{width:26px;height:26px;border-radius:50%;background:var(--blue);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.admin-chip{background:var(--purple-light);color:var(--purple)}
+.logout-btn{background:none;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:6px 12px;cursor:pointer;font-size:12px;font-weight:500;color:var(--muted);transition:all .15s}
+.logout-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* MAIN */
+.main{max-width:1200px;margin:0 auto;padding:0 16px 60px}
+.page{display:none;animation:fadeUp .22s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#1239a5 0%,#1a56db 55%,#2563eb 100%);border-radius:20px;padding:48px 40px;margin:22px 0 22px;color:white;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50px;right:-50px;width:250px;height:250px;background:rgba(255,255,255,.05);border-radius:50%}
+.hero::after{content:'';position:absolute;bottom:-70px;right:80px;width:180px;height:180px;background:rgba(255,255,255,.04);border-radius:50%}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:4px 14px;font-size:13px;margin-bottom:16px}
+.hero-badge span{width:7px;height:7px;background:#4ade80;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.hero h1{font-size:clamp(24px,4.5vw,42px);font-weight:800;line-height:1.12;margin-bottom:12px;letter-spacing:-.5px}
+.hero p{font-size:16px;opacity:.85;max-width:420px;margin-bottom:28px}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* BTNS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
+.btn-white{background:white;color:var(--blue)}.btn-white:hover{background:#f0f4ff}
+.btn-outline-white{background:transparent;color:white;border:1.5px solid rgba(255,255,255,.45)}.btn-outline-white:hover{background:rgba(255,255,255,.1)}
+.btn-primary{background:var(--blue);color:white}.btn-primary:hover{background:var(--blue-dark)}
+.btn-secondary{background:var(--gray-light);color:var(--text)}.btn-secondary:hover{background:var(--border)}
+.btn-success{background:var(--green);color:white}.btn-success:hover{background:#0a7a55}
+.btn-warning{background:#f59e0b;color:white}.btn-warning:hover{background:#d97706}
+.btn-danger{background:var(--red-light);color:var(--red)}.btn-danger:hover{background:#fca5a5}
+.btn-sm{padding:6px 13px;font-size:13px}
+.btn-xs{padding:4px 10px;font-size:12px}
+
+/* CARDS */
+.card{background:white;border-radius:var(--radius);padding:26px;box-shadow:var(--shadow);margin-bottom:18px}
+.card-title{font-size:17px;font-weight:700;margin-bottom:4px;color:var(--text)}
+.card-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.section-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:18px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--border)}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:13px;margin-bottom:18px}
+.stat-card{background:white;border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:13px}
+.stat-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.stat-info .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.stat-info .val{font-family:'Sora',sans-serif;font-size:24px;font-weight:700}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:580px){.form-grid{grid-template-columns:1fr}}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:12px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:.35px}
+.form-group input,.form-group select,.form-group textarea{padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:all .15s;background:white;color:var(--text)}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.09)}
+.form-group input.err,.form-group select.err{border-color:var(--red)}
+.form-actions{margin-top:20px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+
+/* ALERT */
+.alert{border-radius:var(--radius-sm);padding:13px 16px;margin-top:14px;font-size:14px;display:none}
+.alert.show{display:block}
+.alert-success{background:var(--green-light);color:#065f46;border:1px solid #a7f3d0}
+.alert-error{background:var(--red-light);color:#9b1c1c;border:1px solid #fca5a5}
+.tracking-id{font-family:monospace;font-size:14px;font-weight:700;background:rgba(0,0,0,.07);padding:2px 8px;border-radius:4px;letter-spacing:1px}
+
+/* TRACK BOX */
+.track-box{background:white;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:18px}
+.track-input-row{display:flex;gap:10px;flex-wrap:wrap}
+.track-input-row input{flex:1;min-width:180px;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border .15s}
+.track-input-row input:focus{border-color:var(--blue)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.b-booked{background:#e8f0fe;color:#1a56db}
+.b-picked{background:#fef3e2;color:#c97a1a}
+.b-transit{background:#fff3cd;color:#856404}
+.b-arrived{background:#e0f2fe;color:#0284c7}
+.b-outdelivery{background:#f0ebff;color:#6c3eb8}
+.b-delivered{background:#e8f5ee;color:#0e9f6e}
+.b-refused{background:#fde8e8;color:#e02424}
+.b-cancelled{background:#f1f0ef;color:#4b5563}
+.b-failed{background:#fde8e8;color:#9b1c1c}
+.b-reattempt{background:#fff3e0;color:#e65100}
+.b-returned{background:#fce4ec;color:#c2185b}
+.b-returndelivered{background:#e8f5e9;color:#2e7d32}
+
+/* PARCEL DETAIL */
+.parcel-detail{background:white;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-top:14px}
+.pd-header{background:linear-gradient(135deg,var(--blue-dark),var(--blue));padding:20px 24px;color:white;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px}
+.pd-id{font-family:'Sora',sans-serif;font-size:22px;font-weight:800;letter-spacing:1px}
+.pd-body{padding:22px 24px}
+.pd-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+@media(max-width:500px){.pd-info-grid{grid-template-columns:1fr}}
+.pd-info-item .pdi-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.pd-info-item .pdi-val{font-size:14px;font-weight:500}
+.pd-divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+
+/* TIMELINE */
+.timeline{padding:4px 0}
+.timeline-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:16px}
+.timeline-item{display:flex;gap:14px;position:relative;padding-bottom:18px}
+.timeline-item:last-child{padding-bottom:0}
+.timeline-item:not(:last-child)::before{content:'';position:absolute;left:9px;top:20px;bottom:0;width:2px;background:var(--border)}
+.timeline-item.tlactive::before{background:var(--blue)}
+.timeline-item.tldone::before{background:var(--green)}
+.tl-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);background:white;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px;z-index:1}
+.tl-dot.tldone{background:var(--green);border-color:var(--green)}
+.tl-dot.tlactive{background:var(--blue);border-color:var(--blue)}
+.tl-dot.tldone svg,.tl-dot.tlactive svg{width:10px;height:10px;fill:none;stroke:white;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.tl-content .tl-status{font-size:14px;font-weight:600;color:var(--text)}
+.tl-content .tl-time{font-size:12px;color:var(--muted);margin-top:1px}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;border-radius:var(--radius-sm);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+table.wide{min-width:1100px}
+thead tr{background:var(--gray-light)}
+thead th{padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;border-bottom:1px solid var(--border)}
+thead th.th-check{width:36px;text-align:center}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:hover{background:var(--blue-light)}
+tbody tr:last-child{border-bottom:none}
+tbody tr.row-selected{background:#dbeafe}
+td{padding:10px 12px;vertical-align:middle;white-space:nowrap}
+.td-id{font-family:monospace;font-weight:700;color:var(--blue);cursor:pointer}
+.td-id:hover{text-decoration:underline}
+td.td-check{text-align:center}
+input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--blue)}
+
+/* FILTERS BAR */
+.filters-bar{display:flex;gap:9px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.filters-bar input,.filters-bar select{padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;background:white;transition:border .15s;font-family:'DM Sans',sans-serif}
+.filters-bar input{min-width:130px;flex:1}
+.filters-bar select{cursor:pointer}
+.filters-bar input:focus,.filters-bar select:focus{border-color:var(--blue)}
+.table-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px}
+.toolbar-left{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.toolbar-right{display:flex;gap:8px;flex-wrap:wrap}
+
+/* NO RESULT */
+.no-result{text-align:center;padding:48px 20px;color:var(--muted)}
+.no-result .nr-icon{font-size:44px;margin-bottom:12px}
+.no-result p{font-size:15px}
+
+/* SLIP */
+.slip-wrap{margin-top:18px}
+.slip-card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.slip-head{background:linear-gradient(135deg,#0d2c8c,#1a56db);color:white;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.slip-brand{display:flex;align-items:center;gap:9px}
+.slip-brand .sb-box{width:34px;height:34px;background:rgba(255,255,255,.2);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.slip-brand .sb-name{font-family:'Sora',sans-serif;font-weight:800;font-size:20px;letter-spacing:-.5px}
+.slip-brand .sb-tag{font-size:11px;opacity:.75}
+.slip-body{padding:22px 24px}
+.slip-qr-wrap{text-align:center;padding:16px;border:1.5px dashed var(--border);border-radius:var(--radius-sm);margin-bottom:18px}
+.slip-qr-box{display:inline-block;padding:8px;background:white;border:1px solid var(--border);border-radius:8px;margin:8px 0}
+.slip-tid{font-family:'Sora',sans-serif;font-size:18px;font-weight:800;letter-spacing:2.5px;color:var(--text);margin-top:4px}
+.slip-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:480px){.slip-grid{grid-template-columns:1fr}}
+.slip-section{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:13px}
+.slip-sec-title{font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.sf-row{margin-bottom:5px}
+.sf-label{font-size:10px;color:var(--muted)}
+.sf-val{font-size:13px;font-weight:600}
+.slip-footer{border-top:1px solid var(--border);padding-top:13px;text-align:center;font-size:11px;color:var(--muted)}
+.slip-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:13px;flex-wrap:wrap}
+
+/* ADMIN PANEL */
+.admin-panel{background:white;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px}
+.admin-panel-header{background:var(--purple-light);padding:14px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #e9e0ff}
+.admin-panel-header h3{font-size:15px;font-weight:700;color:var(--purple)}
+
+/* RESPONSIVE */
+@media(max-width:640px){
+  .nav-inner{height:auto;padding:10px 16px;flex-wrap:wrap}
+  .nav-links{gap:2px;order:3;width:100%;padding:6px 0;border-top:1px solid var(--border)}
+  .nav-link{padding:6px 10px;font-size:12px}
+  .hero{padding:30px 20px}
+  .card{padding:18px 16px}
+  .pd-header{padding:16px 18px}
+  .pd-body{padding:16px 18px}
+  .filters-bar{flex-direction:column;align-items:stretch}
+  .filters-bar input,.filters-bar select{width:100%}
+  .table-toolbar{flex-direction:column;align-items:flex-start}
+}
+
+/* PRINT TABLE STYLES (for bulk print) */
+@media print{
+  .no-print{display:none!important}
+  body{background:white}
+  .print-table-wrap{display:block!important}
+}
+.print-table-wrap{display:none}
+</style>
+</head>
+<body>
+
+<!-- AUTH USER -->
+<div class="auth-screen active" id="auth-user">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="logo-mark"><svg viewBox="0 0 28 28" fill="none"><path d="M7 10h8l3 5H7V10z" fill="white" opacity=".9"/><path d="M15 10l3 5h3l-2-5h-4z" fill="white" opacity=".6"/><circle cx="10" cy="18" r="2" fill="white"/><circle cx="18" cy="18" r="2" fill="white"/></svg></div>
+      <h2>TRIX Courier</h2>
+      <p>Fast &amp; Reliable Delivery</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+    </div>
+    <div class="auth-form active" id="form-login">
+      <div class="auth-field"><label>Email</label><input type="email" id="login-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="auth-field"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="auth-btn" onclick="doLogin()">Login to TRIX</button>
+      <div class="auth-err" id="login-err"></div>
+    </div>
+    <div class="auth-form" id="form-register">
+      <div class="auth-field"><label>Full Name</label><input type="text" id="reg-name" placeholder="Muhammad Ali"></div>
+      <div class="auth-field"><label>Email</label><input type="email" id="reg-email" placeholder="your@email.com"></div>
+      <div class="auth-field"><label>Phone</label><input type="text" id="reg-phone" placeholder="0300-1234567"></div>
+      <div class="auth-field"><label>Password</label><input type="password" id="reg-pass" placeholder="Min 6 characters"></div>
+      <button class="auth-btn" onclick="doRegister()">Create Account</button>
+      <div class="auth-err" id="reg-err"></div>
+    </div>
+    <div class="admin-login-link"><a onclick="showAdminAuth()">Admin Login →</a></div>
+  </div>
+</div>
+
+<!-- AUTH ADMIN -->
+<div class="auth-screen" id="auth-admin">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="logo-mark" style="background:var(--purple)"><svg viewBox="0 0 28 28" fill="none"><path d="M14 6l2 5h5l-4 3 1.5 5L14 17l-4.5 2 1.5-5-4-3h5z" fill="white"/></svg></div>
+      <h2>TRIX Admin</h2><p>Administrator Access</p>
+    </div>
+    <div class="auth-field"><label>Admin Email</label><input type="email" id="admin-email" placeholder="admin@trix.com" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
+    <div class="auth-field"><label>Password</label><input type="password" id="admin-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
+    <button class="auth-btn" style="background:var(--purple)" onclick="doAdminLogin()">Login as Admin</button>
+    <div class="auth-err" id="admin-err"></div>
+    <div class="admin-login-link" style="margin-top:12px"><a onclick="showUserAuth()">← Back to User Login</a></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo" onclick="showPage('home')">
+      <div class="logo-box"><svg viewBox="0 0 28 28" fill="none"><path d="M7 10h8l3 5H7V10z" fill="white" opacity=".9"/><path d="M15 10l3 5h3l-2-5h-4z" fill="white" opacity=".6"/><circle cx="10" cy="18" r="2" fill="white"/><circle cx="18" cy="18" r="2" fill="white"/></svg></div>
+      <span class="logo-text">TRIX</span>
+    </div>
+    <div class="nav-links">
+      <button class="nav-link active" onclick="showPage('home')" id="nl-home">Home</button>
+      <button class="nav-link" onclick="showPage('book')" id="nl-book">Book</button>
+      <button class="nav-link" onclick="showPage('track')" id="nl-track">Track</button>
+      <button class="nav-link" onclick="showPage('bookings')" id="nl-bookings">Bookings</button>
+      <button class="nav-link" onclick="showPage('history')" id="nl-history">History</button>
+      <button class="nav-link" onclick="showPage('admin')" id="nl-admin" style="display:none;color:var(--purple)">Admin Panel</button>
+    </div>
+    <div class="nav-right">
+      <div class="user-chip" id="user-chip"><div class="user-avatar" id="user-avatar">?</div><span id="user-name-display">User</span></div>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<div class="main">
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-badge"><span></span> Pakistan's Premium Courier</div>
+    <h1>TRIX Courier<br>Fast &amp; Reliable</h1>
+    <p>Book shipments instantly, track in real-time, and get delivered across Pakistan with confidence.</p>
+    <div class="hero-actions">
+      <button class="btn btn-white" onclick="showPage('book')">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Book Parcel
+      </button>
+      <button class="btn btn-outline-white" onclick="showPage('track')">Track Shipment</button>
+    </div>
+  </div>
+  <div class="stats-grid" id="home-stats"></div>
+  <div class="track-box">
+    <div style="font-size:15px;font-weight:600;margin-bottom:12px">Quick Track</div>
+    <div class="track-input-row">
+      <input type="text" id="home-track-input" placeholder="Enter Tracking ID (e.g. TRX123456)" onkeydown="if(event.key==='Enter')quickTrack()">
+      <button class="btn btn-primary" onclick="quickTrack()">Track Now</button>
+    </div>
+    <div id="home-track-result"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Why Choose TRIX?</div>
+    <div class="card-sub">Trusted by thousands of businesses and individuals across Pakistan</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px">
+      <div style="padding:16px;background:var(--blue-light);border-radius:var(--radius-sm)"><div style="font-size:24px;margin-bottom:8px">⚡</div><div style="font-weight:600;font-size:14px;margin-bottom:4px">Same-Day Dispatch</div><div style="font-size:13px;color:var(--muted)">Book before 2pm for same-day dispatch</div></div>
+      <div style="padding:16px;background:var(--green-light);border-radius:var(--radius-sm)"><div style="font-size:24px;margin-bottom:8px">🔍</div><div style="font-weight:600;font-size:14px;margin-bottom:4px">Live Tracking</div><div style="font-size:13px;color:var(--muted)">12-stage tracking from pickup to delivery</div></div>
+      <div style="padding:16px;background:var(--amber-light);border-radius:var(--radius-sm)"><div style="font-size:24px;margin-bottom:8px">💰</div><div style="font-weight:600;font-size:14px;margin-bottom:4px">COD Service</div><div style="font-size:13px;color:var(--muted)">Cash on delivery available nationwide</div></div>
+      <div style="padding:16px;background:var(--purple-light);border-radius:var(--radius-sm)"><div style="font-size:24px;margin-bottom:8px">🛡️</div><div style="font-weight:600;font-size:14px;margin-bottom:4px">Insured Parcels</div><div style="font-size:13px;color:var(--muted)">All shipments covered up to PKR 50,000</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOOK -->
+<div class="page" id="page-book">
+  <div class="card" style="margin-top:22px">
+    <div class="card-title">Book a New Parcel</div>
+    <div class="card-sub">Fill in all details to generate your TRIX tracking ID</div>
+
+    <div class="section-label">Shipper Details</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Shipper Name *</label><input type="text" id="sName" placeholder="Full Name"></div>
+      <div class="form-group"><label>Shipper Phone *</label><input type="text" id="sPhone" placeholder="0300-1234567"></div>
+      <div class="form-group full"><label>Shipper Address *</label><input type="text" id="sAddr" placeholder="House No, Street, Area"></div>
+      <div class="form-group"><label>Shipper City *</label><select id="sCity"></select></div>
+    </div>
+
+    <div class="section-label">Consignee Details</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Consignee Name *</label><input type="text" id="rName" placeholder="Full Name"></div>
+      <div class="form-group"><label>Consignee Phone *</label><input type="text" id="rPhone" placeholder="0300-7654321"></div>
+      <div class="form-group full"><label>Consignee Address *</label><input type="text" id="rAddr" placeholder="House No, Street, Area"></div>
+      <div class="form-group"><label>Consignee City *</label><select id="rCity"></select></div>
+    </div>
+
+    <div class="section-label">Parcel Details</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Weight (kg) *</label><input type="number" id="weight" placeholder="e.g. 2.5" min="0.1" step="0.1"></div>
+      <div class="form-group"><label>Parcel Type *</label>
+        <select id="pType">
+          <option value="">Select Type</option>
+          <option>Documents</option><option>Electronics</option><option>Clothing</option>
+          <option>Food</option><option>Medicine</option><option>Cosmetics</option>
+          <option>Fragile</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group full"><label>Item Description *</label><input type="text" id="itemDesc" placeholder="e.g. Mobile Accessories, Clothes, Documents, Shoes, etc."></div>
+      <div class="form-group"><label>COD Amount (PKR)</label><input type="number" id="codAmount" placeholder="0 if not COD" min="0" step="1"></div>
+      <div class="form-group"><label>Parcel Value (PKR)</label><input type="number" id="parcelValue" placeholder="Declared value" min="0" step="1"></div>
+      <div class="form-group full"><label>Notes</label><input type="text" id="notes" placeholder="Fragile, Handle with care, etc."></div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="clearBookForm()">Clear</button>
+      <button class="btn btn-primary" onclick="bookParcel()">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+        Book Parcel
+      </button>
+    </div>
+    <div class="alert" id="book-alert"></div>
+  </div>
+</div>
+
+<!-- TRACK -->
+<div class="page" id="page-track">
+  <div class="card" style="margin-top:22px">
+    <div class="card-title">Track Your Shipment</div>
+    <div class="card-sub">Enter your TRIX tracking ID to view real-time status and timeline</div>
+    <div class="track-input-row">
+      <input type="text" id="track-input" placeholder="Enter Tracking ID (e.g. TRX123456)" onkeydown="if(event.key==='Enter')trackParcel()">
+      <button class="btn btn-primary" onclick="trackParcel()">Track</button>
+      <button class="btn btn-secondary" onclick="clearTrack()">Clear</button>
+    </div>
+  </div>
+  <div id="track-result"></div>
+</div>
+
+<!-- BOOKINGS -->
+<div class="page" id="page-bookings">
+  <div class="card" style="margin-top:22px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px">
+      <div><div class="card-title">Bookings</div><div class="card-sub" id="bookings-sub" style="margin-bottom:0">All booking records</div></div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="section-label" style="margin-top:16px">Search &amp; Filter</div>
+    <div class="filters-bar">
+      <input type="text" id="f-tid" placeholder="Tracking ID" oninput="renderBookingsTable()">
+      <input type="text" id="f-shipper" placeholder="Shipper Name" oninput="renderBookingsTable()">
+      <input type="text" id="f-consignee" placeholder="Consignee Name" oninput="renderBookingsTable()">
+      <input type="text" id="f-city" placeholder="City (any)" oninput="renderBookingsTable()">
+      <select id="f-status" onchange="renderBookingsTable()"><option value="">All Statuses</option></select>
+      <input type="date" id="f-date" onchange="renderBookingsTable()" title="Filter by date">
+      <button class="btn btn-secondary btn-sm" onclick="clearFilters()">Clear Filters</button>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="table-toolbar">
+      <div class="toolbar-left">
+        <span id="bk-count-label">0 records</span>
+        <span id="bk-sel-label" style="display:none;color:var(--blue);font-weight:600"></span>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn btn-success btn-sm" onclick="exportExcel('bookings')">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="14" height="12" rx="2" stroke="white" stroke-width="1.5"/><path d="M5 8h6M5 11h4M8 5V2" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Export Excel
+        </button>
+        <button class="btn btn-warning btn-sm" onclick="printTable('bookings')">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="3" y="10" width="10" height="5" rx="1" stroke="white" stroke-width="1.5"/><path d="M3 10V5h10v5" stroke="white" stroke-width="1.5"/><path d="M5 1h6v4H5V1z" stroke="white" stroke-width="1.5"/></svg>
+          Print
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrap" id="bookings-table-wrap">
+      <div class="no-result"><div class="nr-icon">📋</div><p>No bookings yet.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="page" id="page-history">
+  <div class="card" style="margin-top:22px">
+    <div class="card-title">Booking History</div>
+    <div class="card-sub" id="history-sub">Click any parcel to view full details</div>
+    <div id="history-list"></div>
+  </div>
+  <div id="history-detail"></div>
+</div>
+
+<!-- ADMIN -->
+<div class="page" id="page-admin">
+  <div style="margin-top:22px">
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div style="width:36px;height:36px;background:var(--purple-light);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px">👑</div>
+        <div><div class="card-title" style="margin-bottom:0">Admin Dashboard</div><div style="font-size:13px;color:var(--muted)">Manage all TRIX shipments and users</div></div>
+      </div>
+      <div class="stats-grid" id="admin-stats"></div>
+    </div>
+    <div class="admin-panel">
+      <div class="admin-panel-header"><span style="font-size:18px">📦</span><h3>All Bookings</h3></div>
+      <div style="padding:16px 20px">
+        <div class="filters-bar">
+          <input type="text" id="af-tid" placeholder="Tracking ID" oninput="renderAdminTable()">
+          <input type="text" id="af-shipper" placeholder="Shipper Name" oninput="renderAdminTable()">
+          <input type="text" id="af-consignee" placeholder="Consignee Name" oninput="renderAdminTable()">
+          <select id="af-status" onchange="renderAdminTable()"><option value="">All Statuses</option></select>
+        </div>
+        <div class="table-toolbar">
+          <div class="toolbar-left"><span id="adm-count-label">0 records</span></div>
+          <div class="toolbar-right">
+            <button class="btn btn-success btn-sm" onclick="exportExcel('admin')">Export Excel</button>
+            <button class="btn btn-warning btn-sm" onclick="printTable('admin')">Print</button>
+          </div>
+        </div>
+        <div class="table-wrap" id="admin-table-wrap"></div>
+      </div>
+    </div>
+    <div class="admin-panel">
+      <div class="admin-panel-header"><span style="font-size:18px">👥</span><h3>All Users</h3></div>
+      <div style="padding:16px 20px"><div class="table-wrap" id="users-table-wrap"></div></div>
+    </div>
+  </div>
+  <div id="admin-parcel-detail"></div>
+</div>
+
+<!-- SLIP -->
+<div id="slip-section" style="display:none;margin-top:18px"></div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// =============================================
+// DATA LAYER
+// =============================================
+const DB={
+  get(k){try{return JSON.parse(localStorage.getItem('trix_'+k))||null}catch(e){return null}},
+  set(k,v){localStorage.setItem('trix_'+k,JSON.stringify(v))},
+  getArr(k){return DB.get(k)||[]},
+  setArr(k,v){DB.set(k,v)}
+};
+(function(){if(!DB.get('admin'))DB.set('admin',{email:'admin@trix.com',password:'admin123',name:'TRIX Admin'})})();
+let session=DB.get('session')||null;
+
+// =============================================
+// AUTH
+// =============================================
+function switchAuthTab(t){
+  document.querySelectorAll('.auth-tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.auth-tab')[t==='login'?0:1].classList.add('active');
+  document.getElementById('form-'+t).classList.add('active');
+}
+function showAdminAuth(){document.getElementById('auth-user').classList.remove('active');document.getElementById('auth-admin').classList.add('active')}
+function showUserAuth(){document.getElementById('auth-admin').classList.remove('active');document.getElementById('auth-user').classList.add('active')}
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block'}
+function hideErr(id){document.getElementById(id).style.display='none'}
+
+function doRegister(){
+  const name=v('reg-name'),email=v('reg-email').toLowerCase(),phone=v('reg-phone'),pass=document.getElementById('reg-pass').value;
+  if(!name||!email||!phone||!pass){showErr('reg-err','All fields are required.');return}
+  if(pass.length<6){showErr('reg-err','Password must be at least 6 characters.');return}
+  const users=DB.getArr('users');
+  if(users.find(u=>u.email===email)){showErr('reg-err','Email already registered.');return}
+  const user={id:'USR'+Date.now(),name,email,phone,password:pass,createdAt:new Date().toISOString()};
+  users.push(user);DB.setArr('users',users);hideErr('reg-err');startSession({...user,role:'user'});
+}
+function doLogin(){
+  const email=v('login-email').toLowerCase(),pass=document.getElementById('login-pass').value;
+  if(!email||!pass){showErr('login-err','Enter email and password.');return}
+  const user=DB.getArr('users').find(u=>u.email===email&&u.password===pass);
+  if(!user){showErr('login-err','Invalid email or password.');return}
+  hideErr('login-err');startSession({...user,role:'user'});
+}
+function doAdminLogin(){
+  const email=v('admin-email').toLowerCase(),pass=document.getElementById('admin-pass').value;
+  const admin=DB.get('admin');
+  if(email===admin.email&&pass===admin.password){hideErr('admin-err');startSession({...admin,role:'admin'})}
+  else showErr('admin-err','Invalid admin credentials.');
+}
+function startSession(user){
+  session=user;DB.set('session',user);
+  document.getElementById('auth-user').classList.remove('active');
+  document.getElementById('auth-admin').classList.remove('active');
+  document.getElementById('app').classList.add('active');
+  setupUI();showPage('home');
+}
+function doLogout(){
+  session=null;DB.set('session',null);
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('auth-user').classList.add('active');
+  ['login-email','login-pass','reg-name','reg-email','reg-phone','reg-pass'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});
+  ['login-err','reg-err'].forEach(hideErr);
+}
+function setupUI(){
+  const ini=session.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('user-avatar').textContent=ini;
+  document.getElementById('user-name-display').textContent=session.name.split(' ')[0];
+  const chip=document.getElementById('user-chip');
+  session.role==='admin'?chip.classList.add('admin-chip'):chip.classList.remove('admin-chip');
+  document.getElementById('nl-admin').style.display=session.role==='admin'?'':'none';
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  populateCities();populateStatusFilters();
+  if(session&&session.id){
+    document.getElementById('auth-user').classList.remove('active');
+    document.getElementById('app').classList.add('active');
+    setupUI();showPage('home');
+  }
+});
+
+// =============================================
+// CONSTANTS
+// =============================================
+const CITIES=['Karachi','Lahore','Islamabad','Rawalpindi','Faisalabad','Multan','Peshawar','Quetta','Hyderabad','Sialkot','Gujranwala','Sukkur','Bahawalpur','Abbottabad','Sargodha','Dera Ghazi Khan','Mardan','Larkana','Sheikhupura','Jhang','Rahim Yar Khan','Gujrat','Kasur','Mingora','Nawabshah'];
+const STATUSES=[
+  {key:'Booked',cls:'b-booked'},{key:'Picked',cls:'b-picked'},{key:'In-Transit',cls:'b-transit'},
+  {key:'Arrived at Destination',cls:'b-arrived'},{key:'Out For Delivery',cls:'b-outdelivery'},
+  {key:'Delivered',cls:'b-delivered'},{key:'Consignee Refused',cls:'b-refused'},
+  {key:'Cancelled by Shipper',cls:'b-cancelled'},{key:'Delivery Failed',cls:'b-failed'},
+  {key:'Re-Attempt',cls:'b-reattempt'},{key:'Returned',cls:'b-returned'},
+  {key:'Return Delivered to Shipper',cls:'b-returndelivered'}
+];
+function sCls(key){return(STATUSES.find(x=>x.key===key)||{cls:'b-booked'}).cls}
+function badge(s){return`<span class="badge ${sCls(s)}"><span class="badge-dot"></span>${s}</span>`}
+
+function populateCities(){
+  const opts='<option value="">Select City</option>'+CITIES.map(c=>`<option>${c}</option>`).join('');
+  ['sCity','rCity'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=opts});
+}
+function populateStatusFilters(){
+  const opts='<option value="">All Statuses</option>'+STATUSES.map(s=>`<option value="${s.key}">${s.key}</option>`).join('');
+  ['f-status','af-status'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=opts});
+}
+
+// =============================================
+// HELPERS
+// =============================================
+function v(id){return(document.getElementById(id)||{}).value?.trim()||''}
+function fmt(d){return new Date(d).toLocaleDateString('en-PK',{day:'2-digit',month:'short',year:'numeric'})}
+function fmtDT(d){return new Date(d).toLocaleString('en-PK',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}
+function pkr(n){return n>0?'PKR '+Number(n).toLocaleString():'—'}
+function getAllParcels(){return DB.getArr('parcels')}
+function getMyParcels(){if(!session)return[];return session.role==='admin'?getAllParcels():getAllParcels().filter(p=>p.userId===session.id)}
+function saveParcel(p){const arr=getAllParcels();const i=arr.findIndex(x=>x.id===p.id);i>=0?arr[i]=p:arr.push(p);DB.setArr('parcels',arr)}
+function genId(){const all=getAllParcels();let id;do{id='TRX'+String(Math.floor(100000+Math.random()*900000))}while(all.find(p=>p.id===id));return id}
+
+// =============================================
+// PAGE NAV
+// =============================================
+function showPage(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  const nl=document.getElementById('nl-'+p);if(nl)nl.classList.add('active');
+  document.getElementById('slip-section').style.display='none';
+  if(p==='home')updateHomeStats();
+  if(p==='bookings')renderBookingsTable();
+  if(p==='history')renderHistory();
+  if(p==='admin')renderAdminPage();
+  window.scrollTo(0,0);
+}
+
+// =============================================
+// HOME STATS
+// =============================================
+function updateHomeStats(){
+  const pp=getMyParcels();
+  const t=pp.length,d=pp.filter(x=>x.status==='Delivered').length,
+    tr=pp.filter(x=>x.status==='In-Transit').length,
+    c=pp.filter(x=>['Cancelled by Shipper','Consignee Refused'].includes(x.status)).length;
+  document.getElementById('home-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-icon" style="background:#e8f0fe">📦</div><div class="stat-info"><div class="label">My Parcels</div><div class="val">${t}</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#e8f5ee">✅</div><div class="stat-info"><div class="label">Delivered</div><div class="val">${d}</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#fff3cd">🚚</div><div class="stat-info"><div class="label">In-Transit</div><div class="val">${tr}</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#fde8e8">❌</div><div class="stat-info"><div class="label">Cancelled</div><div class="val">${c}</div></div></div>`;
+}
+
+// =============================================
+// BOOKING
+// =============================================
+function bookParcel(){
+  const reqFields=[
+    ['sName','Shipper Name'],['sPhone','Shipper Phone'],['sAddr','Shipper Address'],['sCity','Shipper City'],
+    ['rName','Consignee Name'],['rPhone','Consignee Phone'],['rAddr','Consignee Address'],['rCity','Consignee City'],
+    ['weight','Weight'],['pType','Parcel Type'],['itemDesc','Item Description']
+  ];
+  document.querySelectorAll('#page-book input,#page-book select').forEach(e=>e.classList.remove('err'));
+  let err=null;
+  for(const[id,lbl]of reqFields){
+    const e=document.getElementById(id);
+    if(!e.value.trim()){e.classList.add('err');if(!err)err=lbl+' is required.'}
+  }
+  const we=document.getElementById('weight');
+  if(!err&&(isNaN(parseFloat(we.value))||parseFloat(we.value)<=0)){we.classList.add('err');err='Weight must be a positive number.'}
+  const al=document.getElementById('book-alert');
+  if(err){al.className='alert alert-error show';al.innerHTML='<strong>Validation Error:</strong> '+err;return}
+  const now=new Date().toISOString();
+  const parcel={
+    id:genId(),userId:session.id,userName:session.name,
+    sName:v('sName'),sPhone:v('sPhone'),sAddr:v('sAddr'),sCity:v('sCity'),
+    rName:v('rName'),rPhone:v('rPhone'),rAddr:v('rAddr'),rCity:v('rCity'),
+    weight:parseFloat(document.getElementById('weight').value),
+    type:v('pType'),itemDesc:v('itemDesc'),
+    cod:parseFloat(document.getElementById('codAmount').value)||0,
+    value:parseFloat(document.getElementById('parcelValue').value)||0,
+    notes:v('notes')||'None',
+    status:'Booked',timeline:[{status:'Booked',time:now}],createdAt:now
+  };
+  saveParcel(parcel);clearBookForm();
+  al.className='alert alert-success show';
+  al.innerHTML=`<strong>Parcel Booked Successfully!</strong> Tracking ID: <span class="tracking-id">${parcel.id}</span>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary btn-sm" onclick="openTrackById('${parcel.id}')">Track Now</button>
+      <button class="btn btn-secondary btn-sm" onclick="openSlip('${parcel.id}')">Print Slip</button>
+    </div>`;
+  updateHomeStats();
+}
+function clearBookForm(){
+  ['sName','sPhone','sAddr','rName','rPhone','rAddr','weight','codAmount','parcelValue','notes','itemDesc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});
+  ['sCity','rCity','pType'].forEach(id=>{const e=document.getElementById(id);if(e)e.selectedIndex=0});
+  document.querySelectorAll('#page-book input,#page-book select').forEach(e=>e.classList.remove('err'));
+}
+
+// =============================================
+// TRACKING
+// =============================================
+function openTrackById(id){showPage('track');document.getElementById('track-input').value=id;trackParcel()}
+function trackParcel(){
+  const q=v('track-input').toUpperCase();const res=document.getElementById('track-result');
+  if(!q){res.innerHTML='<div class="no-result"><div class="nr-icon">🔍</div><p>Please enter a tracking ID.</p></div>';return}
+  const p=getAllParcels().find(x=>x.id.toUpperCase()===q);
+  if(!p){res.innerHTML=`<div class="no-result"><div class="nr-icon">📭</div><p>No parcel found for ID <strong>${q}</strong>.<br><span style="font-size:13px">Check the ID and try again.</span></p></div>`;return}
+  res.innerHTML=renderParcelCard(p,session.role==='admin');
+}
+function clearTrack(){document.getElementById('track-input').value='';document.getElementById('track-result').innerHTML=''}
+function quickTrack(){
+  const q=v('home-track-input').toUpperCase();const res=document.getElementById('home-track-result');
+  if(!q)return;
+  const p=getAllParcels().find(x=>x.id.toUpperCase()===q);
+  if(!p){res.innerHTML=`<div style="margin-top:10px;padding:12px;background:var(--red-light);border-radius:8px;font-size:13px;color:#9b1c1c">No parcel found for <strong>${q}</strong>.</div>`;return}
+  res.innerHTML=`<div style="margin-top:12px;padding:13px;background:var(--blue-light);border-radius:8px;font-size:13px">Found: <strong>${p.id}</strong> — ${p.sName} → ${p.rName} — ${badge(p.status)}<br><button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="openTrackById('${p.id}')">View Full Details</button></div>`;
+}
+
+// =============================================
+// PARCEL CARD
+// =============================================
+function renderParcelCard(p,isAdmin=false){
+  const statusSelHtml=isAdmin?`<div style="margin-top:12px">
+    <label style="font-size:11px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">Update Status</label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <select id="ssel-${p.id}" style="padding:7px 12px;border-radius:7px;border:none;font-size:13px;outline:none;cursor:pointer">
+        ${STATUSES.map(s=>`<option value="${s.key}"${s.key===p.status?' selected':''}>${s.key}</option>`).join('')}
+      </select>
+      <button class="btn btn-white btn-sm" onclick="updateStatus('${p.id}')">Update</button>
+    </div></div>`:'';
+
+  const tlHtml=p.timeline.slice().reverse().map((t,i)=>`
+    <div class="timeline-item ${i===0?'tlactive':'tldone'}">
+      <div class="tl-dot ${i===0?'tlactive':'tldone'}"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2"/></svg></div>
+      <div class="tl-content"><div class="tl-status">${t.status}</div><div class="tl-time">${fmtDT(t.time)}</div></div>
+    </div>`).join('');
+
+  return `<div class="parcel-detail">
+    <div class="pd-header">
+      <div>
+        <div style="font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">TRIX Tracking ID</div>
+        <div class="pd-id">${p.id}</div>
+        <div style="margin-top:8px">${badge(p.status)}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;opacity:.7;margin-bottom:3px">Booked</div>
+        <div style="font-size:13px">${fmt(p.createdAt)}</div>
+        ${statusSelHtml}
+      </div>
+    </div>
+    <div class="pd-body">
+      <div class="pd-info-grid">
+        <div class="pd-info-item"><div class="pdi-label">Shipper</div><div class="pdi-val">${p.sName}</div><div style="font-size:12px;color:var(--muted)">${p.sAddr}, ${p.sCity}</div><div style="font-size:12px;color:var(--muted)">${p.sPhone}</div></div>
+        <div class="pd-info-item"><div class="pdi-label">Consignee</div><div class="pdi-val">${p.rName}</div><div style="font-size:12px;color:var(--muted)">${p.rAddr}, ${p.rCity}</div><div style="font-size:12px;color:var(--muted)">${p.rPhone}</div></div>
+        <div class="pd-info-item"><div class="pdi-label">Weight</div><div class="pdi-val">${p.weight} kg</div></div>
+        <div class="pd-info-item"><div class="pdi-label">Parcel Type</div><div class="pdi-val">${p.type}</div></div>
+        <div class="pd-info-item"><div class="pdi-label">Item Description</div><div class="pdi-val">${p.itemDesc||'—'}</div></div>
+        <div class="pd-info-item"><div class="pdi-label">COD Amount</div><div class="pdi-val">${pkr(p.cod)}</div></div>
+        <div class="pd-info-item"><div class="pdi-label">Parcel Value</div><div class="pdi-val">${pkr(p.value)}</div></div>
+        <div class="pd-info-item"><div class="pdi-label">Notes</div><div class="pdi-val">${p.notes}</div></div>
+      </div>
+      <hr class="pd-divider">
+      <div class="timeline"><div class="timeline-title">Shipment Timeline</div>${tlHtml}</div>
+      <div style="margin-top:16px">
+        <button class="btn btn-primary btn-sm" onclick="openSlip('${p.id}')">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="10" width="10" height="5" rx="1" stroke="white" stroke-width="1.5"/><path d="M3 10V5h10v5" stroke="white" stroke-width="1.5"/><path d="M5 1h6v4H5V1z" stroke="white" stroke-width="1.5"/></svg>
+          Print Slip
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// =============================================
+// STATUS UPDATE
+// =============================================
+function updateStatus(pid){
+  const sel=document.getElementById('ssel-'+pid);if(!sel)return;
+  const p=getAllParcels().find(x=>x.id===pid);if(!p)return;
+  p.status=sel.value;p.timeline.push({status:sel.value,time:new Date().toISOString()});
+  saveParcel(p);
+  const ap=document.querySelector('.page.active').id;
+  if(ap==='page-track')trackParcel();
+  if(ap==='page-history'){renderHistory();renderHistoryDetail(pid)}
+  if(ap==='page-admin'){renderAdminTable();renderAdminDetail(pid)}
+  if(ap==='page-bookings')renderBookingsTable();
+  updateHomeStats();
+}
+
+// =============================================
+// BOOKINGS TABLE
+// =============================================
+let bkTableData=[];
+
+function getFilteredBookings(){
+  const tid=v('f-tid').toUpperCase(),sh=v('f-shipper').toLowerCase(),
+    cn=v('f-consignee').toLowerCase(),cy=v('f-city').toLowerCase(),
+    st=v('f-status'),dt=v('f-date');
+  return getMyParcels().filter(p=>{
+    if(tid&&!p.id.includes(tid))return false;
+    if(sh&&!p.sName.toLowerCase().includes(sh))return false;
+    if(cn&&!p.rName.toLowerCase().includes(cn))return false;
+    if(cy&&!p.sCity.toLowerCase().includes(cy)&&!p.rCity.toLowerCase().includes(cy))return false;
+    if(st&&p.status!==st)return false;
+    if(dt&&!p.createdAt.startsWith(dt))return false;
+    return true;
+  }).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+}
+
+function clearFilters(){
+  ['f-tid','f-shipper','f-consignee','f-city','f-date'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});
+  const fs=document.getElementById('f-status');if(fs)fs.value='';
+  renderBookingsTable();
+}
+
+function renderBookingsTable(){
+  bkTableData=getFilteredBookings();
+  const sel=getSelectedIds('bk');
+  const wrap=document.getElementById('bookings-table-wrap');
+  document.getElementById('bookings-sub').textContent=session.role==='admin'?`All bookings`:`Your bookings`;
+  document.getElementById('bk-count-label').textContent=`${bkTableData.length} record${bkTableData.length!==1?'s':''}`;
+  const selCount=sel.size;
+  const slbl=document.getElementById('bk-sel-label');
+  if(selCount>0){slbl.style.display='';slbl.textContent=`(${selCount} selected)`}else{slbl.style.display='none'}
+
+  if(!bkTableData.length){wrap.innerHTML='<div class="no-result"><div class="nr-icon">📭</div><p>No bookings match your filters.</p></div>';return}
+
+  const allChecked=bkTableData.every(p=>sel.has(p.id));
+  wrap.innerHTML=`<table class="wide">
+    <thead><tr>
+      <th class="th-check"><input type="checkbox" id="bk-chk-all" ${allChecked?'checked':''} onchange="toggleAllCheckboxes('bk',this.checked)"></th>
+      <th>Tracking ID</th><th>Date</th><th>Shipper Name</th><th>Shipper City</th>
+      <th>Consignee Name</th><th>Consignee City</th><th>Weight</th><th>Parcel Type</th>
+      <th>Item Description</th><th>COD Amount</th><th>Parcel Value</th><th>Status</th>
+    </tr></thead>
+    <tbody>${bkTableData.map(p=>`<tr class="${sel.has(p.id)?'row-selected':''}" id="bkr-${p.id}">
+      <td class="td-check"><input type="checkbox" class="bk-chk" value="${p.id}" ${sel.has(p.id)?'checked':''} onchange="onRowCheck('bk','${p.id}',this.checked)"></td>
+      <td class="td-id" onclick="openTrackById('${p.id}')">${p.id}</td>
+      <td>${fmt(p.createdAt)}</td>
+      <td>${p.sName}</td><td>${p.sCity}</td>
+      <td>${p.rName}</td><td>${p.rCity}</td>
+      <td>${p.weight}kg</td><td>${p.type}</td>
+      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${p.itemDesc||'—'}</td>
+      <td>${pkr(p.cod)}</td><td>${pkr(p.value)}</td>
+      <td>${badge(p.status)}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+// =============================================
+// CHECKBOX / SELECT LOGIC
+// =============================================
+const selectedSets={bk:new Set(),adm:new Set()};
+function getSelectedIds(ns){return selectedSets[ns]||new Set()}
+function toggleAllCheckboxes(ns,checked){
+  const data=ns==='bk'?bkTableData:admTableData;
+  const ss=selectedSets[ns];
+  data.forEach(p=>checked?ss.add(p.id):ss.delete(p.id));
+  if(ns==='bk')renderBookingsTable();else renderAdminTable();
+}
+function onRowCheck(ns,id,checked){
+  checked?selectedSets[ns].add(id):selectedSets[ns].delete(id);
+  const row=document.getElementById((ns==='bk'?'bkr-':'admr-')+id);
+  if(row)row.className=checked?'row-selected':'';
+  const selCount=selectedSets[ns].size;
+  if(ns==='bk'){
+    const slbl=document.getElementById('bk-sel-label');
+    if(selCount>0){slbl.style.display='';slbl.textContent=`(${selCount} selected)`}else slbl.style.display='none';
+  }
+}
+
+// =============================================
+// HISTORY
+// =============================================
+function renderHistory(){
+  const pp=getMyParcels().sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  document.getElementById('history-sub').textContent=session.role==='admin'?`All parcels (${pp.length})`:`Your parcels (${pp.length})`;
+  const list=document.getElementById('history-list');
+  document.getElementById('history-detail').innerHTML='';
+  if(!pp.length){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">📦</div><p>No parcels yet.</p><button class="btn btn-primary" style="margin-top:12px" onclick="showPage(\'book\')">Book Your First Parcel</button></div>';return}
+  list.innerHTML='<div style="display:flex;flex-direction:column;gap:10px">'+pp.map(p=>`
+    <div style="background:white;border-radius:var(--radius-sm);padding:13px 16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;flex-wrap:wrap;cursor:pointer;transition:box-shadow .15s" onclick="renderHistoryDetail('${p.id}')" onmouseenter="this.style.boxShadow='var(--shadow-lg)'" onmouseleave="this.style.boxShadow='var(--shadow)'">
+      <div style="font-family:monospace;font-weight:700;color:var(--blue);font-size:13px;min-width:100px">${p.id}</div>
+      <div style="flex:1;font-size:13px;color:var(--muted)"><strong style="color:var(--text)">${p.sName}</strong> → ${p.rName}</div>
+      <div style="font-size:13px;color:var(--muted)">${p.sCity} → ${p.rCity}</div>
+      ${badge(p.status)}
+      <div style="font-size:12px;color:var(--muted)">${fmt(p.createdAt)}</div>
+    </div>`).join('')+'</div>';
+}
+function renderHistoryDetail(id){
+  const p=getAllParcels().find(x=>x.id===id);if(!p)return;
+  document.getElementById('history-detail').innerHTML=renderParcelCard(p,session.role==='admin');
+  document.getElementById('history-detail').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// =============================================
+// ADMIN
+// =============================================
+let admTableData=[];
+function renderAdminPage(){
+  const all=getAllParcels(),users=DB.getArr('users');
+  const t=all.length,d=all.filter(x=>x.status==='Delivered').length,
+    tr=all.filter(x=>x.status==='In-Transit').length,
+    c=all.filter(x=>['Cancelled by Shipper','Consignee Refused'].includes(x.status)).length;
+  document.getElementById('admin-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-icon" style="background:#e8f0fe">📦</div><div class="stat-info"><div class="label">Total</div><div class="val">${t}</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#e8f5ee">✅</div><div class="stat-info"><div class="label">Delivered</div><div class="val">${d}</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#fff3cd">🚚</div><div class="stat-info"><div class="label">In-Transit</div><div class="val">${tr}</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#fde8e8">❌</div><div class="stat-info"><div class="label">Cancelled</div><div class="val">${c}</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:var(--purple-light)">👥</div><div class="stat-info"><div class="label">Users</div><div class="val">${users.length}</div></div></div>`;
+  renderAdminTable();renderUsersTable(users);
+}
+function renderAdminTable(){
+  const tid=v('af-tid').toUpperCase(),sh=v('af-shipper').toLowerCase(),
+    cn=v('af-consignee').toLowerCase(),st=v('af-status');
+  admTableData=getAllParcels().filter(p=>{
+    if(tid&&!p.id.includes(tid))return false;
+    if(sh&&!p.sName.toLowerCase().includes(sh))return false;
+    if(cn&&!p.rName.toLowerCase().includes(cn))return false;
+    if(st&&p.status!==st)return false;
+    return true;
+  }).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  const sel=getSelectedIds('adm');
+  document.getElementById('adm-count-label').textContent=`${admTableData.length} record${admTableData.length!==1?'s':''}`;
+  const wrap=document.getElementById('admin-table-wrap');
+  if(!admTableData.length){wrap.innerHTML='<div class="no-result"><div class="nr-icon">📭</div><p>No bookings found.</p></div>';return}
+  wrap.innerHTML=`<table class="wide">
+    <thead><tr>
+      <th class="th-check"><input type="checkbox" onchange="toggleAllCheckboxes('adm',this.checked)"></th>
+      <th>Tracking ID</th><th>Booked By</th><th>Shipper</th><th>Consignee</th>
+      <th>Weight</th><th>Item Desc</th><th>COD</th><th>Status</th><th>Date</th><th>Action</th>
+    </tr></thead>
+    <tbody>${admTableData.map(p=>`<tr class="${sel.has(p.id)?'row-selected':''}" id="admr-${p.id}">
+      <td class="td-check"><input type="checkbox" class="adm-chk" value="${p.id}" ${sel.has(p.id)?'checked':''} onchange="onRowCheck('adm','${p.id}',this.checked)"></td>
+      <td class="td-id" onclick="renderAdminDetail('${p.id}')">${p.id}</td>
+      <td>${p.userName||'—'}</td>
+      <td>${p.sName}<br><span style="font-size:11px;color:var(--muted)">${p.sCity}</span></td>
+      <td>${p.rName}<br><span style="font-size:11px;color:var(--muted)">${p.rCity}</span></td>
+      <td>${p.weight}kg</td>
+      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${p.itemDesc||'—'}</td>
+      <td>${pkr(p.cod)}</td>
+      <td>${badge(p.status)}</td>
+      <td>${fmt(p.createdAt)}</td>
+      <td><button class="btn btn-primary btn-xs" onclick="renderAdminDetail('${p.id}')">Details</button></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+function renderAdminDetail(id){
+  const p=getAllParcels().find(x=>x.id===id);if(!p)return;
+  document.getElementById('admin-parcel-detail').innerHTML=renderParcelCard(p,true);
+  document.getElementById('admin-parcel-detail').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function renderUsersTable(users){
+  const wrap=document.getElementById('users-table-wrap');
+  if(!users||!users.length){wrap.innerHTML='<div class="no-result"><div class="nr-icon">👤</div><p>No registered users.</p></div>';return}
+  const all=getAllParcels();
+  wrap.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Total Parcels</th><th>Registered</th></tr></thead>
+    <tbody>${users.map(u=>`<tr><td style="font-weight:600">${u.name}</td><td>${u.email}</td><td>${u.phone}</td><td>${all.filter(p=>p.userId===u.id).length}</td><td>${fmt(u.createdAt)}</td></tr>`).join('')}</tbody></table>`;
+}
+
+// =============================================
+// EXPORT TO EXCEL
+// =============================================
+function getExportData(ns){
+  const sel=getSelectedIds(ns);
+  const data=ns==='bk'?bkTableData:admTableData;
+  return sel.size>0?data.filter(p=>sel.has(p.id)):data;
+}
+function exportExcel(ns){
+  const data=getExportData(ns);
+  if(!data.length){alert('No data to export.');return}
+  const rows=data.map(p=>({
+    'Tracking ID':p.id,'Date':fmt(p.createdAt),
+    'Shipper Name':p.sName,'Shipper Phone':p.sPhone,'Shipper Address':p.sAddr,'Shipper City':p.sCity,
+    'Consignee Name':p.rName,'Consignee Phone':p.rPhone,'Consignee Address':p.rAddr,'Consignee City':p.rCity,
+    'Weight (kg)':p.weight,'Parcel Type':p.type,'Item Description':p.itemDesc||'',
+    'COD Amount':p.cod,'Parcel Value':p.value,'Notes':p.notes,'Status':p.status,
+    'Booked By':p.userName||''
+  }));
+  const ws=XLSX.utils.json_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'TRIX Bookings');
+  XLSX.writeFile(wb,`TRIX_Bookings_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+// =============================================
+// PRINT TABLE
+// =============================================
+function printTable(ns){
+  const data=getExportData(ns);
+  if(!data.length){alert('No data to print.');return}
+  const rows=data.map(p=>`<tr>
+    <td>${p.id}</td><td>${fmt(p.createdAt)}</td>
+    <td>${p.sName}</td><td>${p.sCity}</td>
+    <td>${p.rName}</td><td>${p.rCity}</td>
+    <td>${p.weight}kg</td><td>${p.type}</td>
+    <td>${p.itemDesc||'—'}</td><td>${pkr(p.cod)}</td>
+    <td>${pkr(p.value)}</td><td>${p.status}</td>
+  </tr>`).join('');
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>TRIX Bookings — Print</title>
+  <style>*{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:sans-serif;padding:20px;font-size:12px;color:#111}
+  h2{font-size:16px;margin-bottom:4px}.sub{font-size:11px;color:#666;margin-bottom:16px}
+  table{width:100%;border-collapse:collapse;font-size:11px}
+  th{background:#1a56db;color:white;padding:7px 8px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.3px}
+  td{padding:7px 8px;border-bottom:1px solid #e5e7eb;vertical-align:top}
+  tr:nth-child(even){background:#f9fafb}
+  .logo{color:#1a56db;font-weight:800;font-size:18px;margin-bottom:2px}
+  @media print{button{display:none}@page{margin:10mm;size:landscape}}
+  </style></head><body>
+  <div class="logo">TRIX Courier</div>
+  <h2>Bookings Report</h2>
+  <div class="sub">Printed: ${fmtDT(new Date())} | Total: ${data.length} records</div>
+  <table><thead><tr>
+    <th>Tracking ID</th><th>Date</th><th>Shipper</th><th>From City</th>
+    <th>Consignee</th><th>To City</th><th>Weight</th><th>Type</th>
+    <th>Item Desc</th><th>COD</th><th>Value</th><th>Status</th>
+  </tr></thead><tbody>${rows}</tbody></table>
+  <br><button onclick="window.print()" style="padding:8px 18px;background:#1a56db;color:white;border:none;border-radius:6px;cursor:pointer">🖨️ Print</button>
+  </body></html>`);
+  w.document.close();setTimeout(()=>w.print(),400);
+}
+
+// =============================================
+// PARCEL SLIP WITH QR
+// =============================================
+function openSlip(parcelId){
+  const p=getAllParcels().find(x=>x.id===parcelId);if(!p)return;
+  const slipHtml=`<div class="slip-wrap">
+    <div class="slip-card">
+      <div class="slip-head">
+        <div class="slip-brand">
+          <div class="sb-box"><svg viewBox="0 0 28 28" fill="none"><path d="M7 10h8l3 5H7V10z" fill="white" opacity=".9"/><path d="M15 10l3 5h3l-2-5h-4z" fill="white" opacity=".6"/><circle cx="10" cy="18" r="2" fill="white"/><circle cx="18" cy="18" r="2" fill="white"/></svg></div>
+          <div><div class="sb-name">TRIX</div><div class="sb-tag">Courier &amp; Logistics</div></div>
+        </div>
+        <div style="text-align:right;font-size:12px;opacity:.8">Booking Date: ${fmt(p.createdAt)}<br>Printed: ${fmt(new Date())}</div>
+      </div>
+      <div class="slip-body">
+        <div class="slip-qr-wrap">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Scan to Track</div>
+          <div class="slip-qr-box" id="qr-${p.id}"></div>
+          <div class="slip-tid">${p.id}</div>
+        </div>
+        <div class="slip-grid">
+          <div class="slip-section">
+            <div class="slip-sec-title">Shipper (From)</div>
+            <div class="sf-row"><div class="sf-label">Name</div><div class="sf-val">${p.sName}</div></div>
+            <div class="sf-row"><div class="sf-label">Phone</div><div class="sf-val">${p.sPhone}</div></div>
+            <div class="sf-row"><div class="sf-label">Address</div><div class="sf-val">${p.sAddr}</div></div>
+            <div class="sf-row"><div class="sf-label">City</div><div class="sf-val">${p.sCity}</div></div>
+          </div>
+          <div class="slip-section">
+            <div class="slip-sec-title">Consignee (To)</div>
+            <div class="sf-row"><div class="sf-label">Name</div><div class="sf-val">${p.rName}</div></div>
+            <div class="sf-row"><div class="sf-label">Phone</div><div class="sf-val">${p.rPhone}</div></div>
+            <div class="sf-row"><div class="sf-label">Address</div><div class="sf-val">${p.rAddr}</div></div>
+            <div class="sf-row"><div class="sf-label">City</div><div class="sf-val">${p.rCity}</div></div>
+          </div>
+        </div>
+        <div class="slip-section" style="margin-bottom:14px">
+          <div class="slip-sec-title">Parcel Details</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px">
+            <div class="sf-row"><div class="sf-label">Weight</div><div class="sf-val">${p.weight} kg</div></div>
+            <div class="sf-row"><div class="sf-label">Type</div><div class="sf-val">${p.type}</div></div>
+            <div class="sf-row"><div class="sf-label">Item Description</div><div class="sf-val">${p.itemDesc||'—'}</div></div>
+            <div class="sf-row"><div class="sf-label">COD Amount</div><div class="sf-val">${pkr(p.cod)}</div></div>
+            <div class="sf-row"><div class="sf-label">Parcel Value</div><div class="sf-val">${pkr(p.value)}</div></div>
+            <div class="sf-row"><div class="sf-label">Status</div><div class="sf-val">${badge(p.status)}</div></div>
+            <div class="sf-row"><div class="sf-label">Notes</div><div class="sf-val">${p.notes}</div></div>
+          </div>
+        </div>
+        <div class="slip-footer">This slip is proof of booking with TRIX Courier &amp; Logistics. Please retain until delivery is confirmed.<br><strong>TRIX</strong> — Fast. Reliable. Trusted. | trix.com.pk</div>
+      </div>
+    </div>
+    <div class="slip-actions">
+      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('slip-section').style.display='none'">Close</button>
+      <button class="btn btn-primary btn-sm" onclick="printSlip('${p.id}')">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="10" width="10" height="5" rx="1" stroke="white" stroke-width="1.5"/><path d="M3 10V5h10v5" stroke="white" stroke-width="1.5"/><path d="M5 1h6v4H5V1z" stroke="white" stroke-width="1.5"/></svg>
+        Print Slip
+      </button>
+    </div>
+  </div>`;
+  const slip=document.getElementById('slip-section');
+  slip.innerHTML=slipHtml;slip.style.display='block';
+  // Generate QR
+  try{
+    new QRCode(document.getElementById('qr-'+p.id),{
+      text:p.id,width:100,height:100,colorDark:'#111827',colorLight:'#ffffff',
+      correctLevel:QRCode.CorrectLevel.M
+    });
+  }catch(e){document.getElementById('qr-'+p.id).textContent=p.id}
+  slip.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function printSlip(parcelId){
+  const p=getAllParcels().find(x=>x.id===parcelId);if(!p)return;
+  // Get QR image if available
+  const qrEl=document.getElementById('qr-'+p.id);
+  let qrImg='';
+  if(qrEl){const img=qrEl.querySelector('img');if(img)qrImg=`<img src="${img.src}" style="width:90px;height:90px">`; }
+
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>TRIX Parcel Slip — ${p.id}</title>
+  <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:sans-serif;padding:24px;color:#111;font-size:14px}
+  .head{background:#1a56db;color:white;padding:16px 20px;border-radius:10px 10px 0 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  .brand .nm{font-size:22px;font-weight:800;font-family:Georgia,serif}.brand .tg{font-size:11px;opacity:.75}
+  .body{border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px}
+  .qr-wrap{text-align:center;padding:14px;border:1.5px dashed #e5e7eb;border-radius:8px;margin-bottom:16px}
+  .qr-lbl{font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .qr-box{display:inline-block;padding:6px;border:1px solid #e5e7eb;border-radius:6px;margin:4px 0}
+  .tid{font-size:18px;font-weight:800;letter-spacing:3px;margin-top:6px;font-family:monospace}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+  .sec{border:1.5px solid #e5e7eb;border-radius:8px;padding:12px}
+  .stitle{font-size:10px;font-weight:700;color:#1a56db;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+  .row{margin-bottom:5px}.lbl{font-size:10px;color:#6b7280}.val{font-size:13px;font-weight:600}
+  .dg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+  .ft{border-top:1px solid #e5e7eb;padding-top:12px;text-align:center;font-size:11px;color:#9ca3af;margin-top:14px}
+  @media print{button{display:none}@page{margin:12mm}}
+  </style></head><body>
+  <div class="head">
+    <div class="brand"><div class="nm">TRIX</div><div class="tg">Courier &amp; Logistics</div></div>
+    <div style="text-align:right;font-size:12px;opacity:.8">Booking: ${fmt(p.createdAt)}<br>Printed: ${fmt(new Date())}</div>
+  </div>
+  <div class="body">
+    <div class="qr-wrap">
+      <div class="qr-lbl">Scan QR to Track</div>
+      <div class="qr-box">${qrImg||`<div style="width:90px;height:90px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#999;border:1px solid #e5e7eb">QR</div>`}</div>
+      <div class="tid">${p.id}</div>
+    </div>
+    <div class="grid">
+      <div class="sec"><div class="stitle">Shipper (From)</div>
+        <div class="row"><div class="lbl">Name</div><div class="val">${p.sName}</div></div>
+        <div class="row"><div class="lbl">Phone</div><div class="val">${p.sPhone}</div></div>
+        <div class="row"><div class="lbl">Address</div><div class="val">${p.sAddr}</div></div>
+        <div class="row"><div class="lbl">City</div><div class="val">${p.sCity}</div></div>
+      </div>
+      <div class="sec"><div class="stitle">Consignee (To)</div>
+        <div class="row"><div class="lbl">Name</div><div class="val">${p.rName}</div></div>
+        <div class="row"><div class="lbl">Phone</div><div class="val">${p.rPhone}</div></div>
+        <div class="row"><div class="lbl">Address</div><div class="val">${p.rAddr}</div></div>
+        <div class="row"><div class="lbl">City</div><div class="val">${p.rCity}</div></div>
+      </div>
+    </div>
+    <div class="sec" style="margin-bottom:14px"><div class="stitle">Parcel Details</div>
+      <div class="dg">
+        <div class="row"><div class="lbl">Weight</div><div class="val">${p.weight} kg</div></div>
+        <div class="row"><div class="lbl">Type</div><div class="val">${p.type}</div></div>
+        <div class="row"><div class="lbl">Item Description</div><div class="val">${p.itemDesc||'—'}</div></div>
+        <div class="row"><div class="lbl">COD Amount</div><div class="val">${pkr(p.cod)}</div></div>
+        <div class="row"><div class="lbl">Parcel Value</div><div class="val">${pkr(p.value)}</div></div>
+        <div class="row"><div class="lbl">Status</div><div class="val">${p.status}</div></div>
+        <div class="row"><div class="lbl">Notes</div><div class="val">${p.notes}</div></div>
+      </div>
+    </div>
+    <div class="ft">This slip is proof of booking with TRIX Courier &amp; Logistics. Please retain until delivery is confirmed.<br><strong>TRIX</strong> — Fast. Reliable. Trusted. | trix.com.pk</div>
+  </div>
+  <br><button onclick="window.print()" style="padding:10px 20px;background:#1a56db;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px">🖨️ Print Slip</button>
+  </body></html>`);
+  w.document.close();setTimeout(()=>w.print(),500);
+}
+</script>
+</body>
+</html>
