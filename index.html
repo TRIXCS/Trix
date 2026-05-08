@@ -1191,7 +1191,60 @@ function printSlip(parcelId){
 }
 </script>
 <script type="module">
+async function registerUser() {
 
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  try {
+
+    const userCredential =
+      await createUserWithEmailAndPassword(auth, email, password);
+
+    alert("User Registered");
+
+  } catch (error) {
+    alert(error.message);
+  }
+}
+  async function loginUser() {
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  try {
+
+    await signInWithEmailAndPassword(auth, email, password);
+
+    alert("Login Success");
+
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+  async function saveParcel() {
+
+  try {
+
+    await addDoc(collection(db, "parcels"), {
+
+      trackingId: "TRX123456",
+      shipper: "Ali",
+      consignee: "Ahmed",
+      status: "Booked",
+      createdAt: new Date()
+
+    });
+
+    alert("Parcel Saved");
+
+  } catch (error) {
+    console.log(error);
+  }
+}
+  
+  
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
