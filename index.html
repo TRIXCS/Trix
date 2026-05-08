@@ -1190,5 +1190,49 @@ function printSlip(parcelId){
   w.document.close();setTimeout(()=>w.print(),500);
 }
 </script>
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDbckYvdbkZhWCB2c-Hp2V22gE9GDpquiI",
+    authDomain: "trix-db.firebaseapp.com",
+    databaseURL: "https://trix-db-default-rtdb.firebaseio.com",
+    projectId: "trix-db",
+    storageBucket: "trix-db.firebasestorage.app",
+    messagingSenderId: "47309877551",
+    appId: "1:47309877551:web:3d34daee533cbd9bd9f1da",
+    measurementId: "G-PRNN5N3LBC"
+  };
+
+  const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+window.auth = auth;
+window.db = db;
+window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+window.signOut = signOut;
+window.collection = collection;
+window.addDoc = addDoc;
+window.getDocs = getDocs;
+
+</script>
 </body>
 </html>
