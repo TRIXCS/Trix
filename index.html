@@ -560,16 +560,55 @@ function showUserAuth(){document.getElementById('auth-admin').classList.remove('
 function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block'}
 function hideErr(id){document.getElementById(id).style.display='none'}
 
-function doRegister(){
-  const name=v('reg-name'),email=v('reg-email').toLowerCase(),phone=v('reg-phone'),pass=document.getElementById('reg-pass').value;
-  if(!name||!email||!phone||!pass){showErr('reg-err','All fields are required.');return}
-  if(pass.length<6){showErr('reg-err','Password must be at least 6 characters.');return}
-  const users=DB.getArr('users');
-  if(users.find(u=>u.email===email)){showErr('reg-err','Email already registered.');return}
-  const user={id:'USR'+Date.now(),name,email,phone,password:pass,createdAt:new Date().toISOString()};
-  users.push(user);DB.setArr('users',users);firebaseRegister(user);hideErr('reg-err');startSession({...user,role:'user'});
+async function doRegister(){
+
+  const name = val('reg-name');
+  const email = val('reg-email').toLowerCase();
+  const pass = val('reg-pass');
+
+  if(!name || !email || !pass){
+
+    return showErr('reg-err','Fill all fields');
+
+  }
+
+  const users = DB.getArr('users');
+
+  if(users.find(x=>x.email===email)){
+
+    return showErr('reg-err','Email already registered');
+
+  }
+
+  const user = {
+    name:name,
+    email:email,
+    password:pass,
+    role:'user'
+  };
+
+  users.push(user);
+
+  DB.setArr('users',users);
+
+  // FIREBASE REGISTER
+  try{
+
+    await firebaseRegister(user);
+
+  }catch(err){
+
+    console.log(err);
+
+  }
+
+  hideErr('reg-err');
+
+  startSession(user);
+
 }
-function doLogin(){
+
+  function doLogin(){
   const email=v('login-email').toLowerCase(),pass=document.getElementById('login-pass').value;
   if(!email||!pass){showErr('login-err','Enter email and password.');return}
   const user=DB.getArr('users').find(u=>u.email===email&&u.password===pass);
