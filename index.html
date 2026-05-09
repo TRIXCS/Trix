@@ -567,14 +567,14 @@ function doRegister(){
   const users=DB.getArr('users');
   if(users.find(u=>u.email===email)){showErr('reg-err','Email already registered.');return}
   const user={id:'USR'+Date.now(),name,email,phone,password:pass,createdAt:new Date().toISOString()};
-  users.push(user);DB.setArr('users',users);hideErr('reg-err');startSession({...user,role:'user'});
+  users.push(user);DB.setArr('users',users);firebaseRegister(user);hideErr('reg-err');startSession({...user,role:'user'});
 }
 function doLogin(){
   const email=v('login-email').toLowerCase(),pass=document.getElementById('login-pass').value;
   if(!email||!pass){showErr('login-err','Enter email and password.');return}
   const user=DB.getArr('users').find(u=>u.email===email&&u.password===pass);
   if(!user){showErr('login-err','Invalid email or password.');return}
-  hideErr('login-err');startSession({...user,role:'user'});
+  hideErr('login-err');firebaseLogin(email,pass);startSession({...user,role:'user'});
 }
 function doAdminLogin(){
   const email=v('admin-email').toLowerCase(),pass=document.getElementById('admin-pass').value;
@@ -711,7 +711,7 @@ function bookParcel(){
     notes:v('notes')||'None',
     status:'Booked',timeline:[{status:'Booked',time:now}],createdAt:now
   };
-  saveParcel(parcel);clearBookForm();
+  saveParcel(parcel);firebaseSaveParcel(parcel);aclearBookForm();
   al.className='alert alert-success show';
   al.innerHTML=`<strong>Parcel Booked Successfully!</strong> Tracking ID: <span class="tracking-id">${parcel.id}</span>
     <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
@@ -1189,102 +1189,120 @@ function printSlip(parcelId){
   </body></html>`);
   w.document.close();setTimeout(()=>w.print(),500);
 }
-</script>
 <script type="module">
-async function registerUser() {
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  try {
-
-    const userCredential =
-      await createUserWithEmailAndPassword(auth, email, password);
-
-    alert("User Registered");
-
-  } catch (error) {
-    alert(error.message);
-  }
-}
-  async function loginUser() {
-
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  try {
-
-    await signInWithEmailAndPassword(auth, email, password);
-
-    alert("Login Success");
-
-  } catch (error) {
-    alert(error.message);
-  }
-}
-
-  async function saveParcel() {
-
-  try {
-
-    await addDoc(collection(db, "parcels"), {
-
-      trackingId: "TRX123456",
-      shipper: "Ali",
-      consignee: "Ahmed",
-      status: "Booked",
-      createdAt: new Date()
-
-    });
-
-    alert("Parcel Saved");
-
-  } catch (error) {
-    console.log(error);
-  }
-}
-  
-  
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
   getAuth,
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut
+  signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
   getFirestore,
   collection,
-  addDoc,
-  getDocs
+  addDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyDbckYvdbkZhWCB2c-Hp2V22gE9GDpquiI",
-    authDomain: "trix-db.firebaseapp.com",
-    databaseURL: "https://trix-db-default-rtdb.firebaseio.com",
-    projectId: "trix-db",
-    storageBucket: "trix-db.firebasestorage.app",
-    messagingSenderId: "47309877551",
-    appId: "1:47309877551:web:3d34daee533cbd9bd9f1da",
-    measurementId: "G-PRNN5N3LBC"
-  };
 
-  const app = initializeApp(firebaseConfig);
+// =============================================
+// FIREBASE CONFIG
+// =============================================
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDbckYvdbkZhWCB2c-Hp2V22gE9GDpquiI",
+  authDomain: "trix-db.firebaseapp.com",
+  projectId: "trix-db",
+  storageBucket: "trix-db.firebasestorage.app",
+  messagingSenderId: "47309877551",
+  appId: "1:47309877551:web:3d34daee533cbd9bd9f1da"
+};
+
+
+// =============================================
+// INIT
+// =============================================
+
+const app = initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
+
 const db = getFirestore(app);
 
-window.auth = auth;
-window.db = db;
-window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-window.signInWithEmailAndPassword = signInWithEmailAndPassword;
-window.signOut = signOut;
-window.collection = collection;
-window.addDoc = addDoc;
-window.getDocs = getDocs;
+
+// =============================================
+// REGISTER
+// =============================================
+
+window.firebaseRegister = async function(user){
+
+  try{
+
+    await createUserWithEmailAndPassword(
+      auth,
+      user.email,
+      user.password
+    );
+
+    console.log("Firebase Register Success");
+
+  }catch(error){
+
+    console.log(error.message);
+
+  }
+
+};
+
+
+// =============================================
+// LOGIN
+// =============================================
+
+window.firebaseLogin = async function(email,password){
+
+  try{
+
+    await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    console.log("Firebase Login Success");
+
+  }catch(error){
+
+    console.log(error.message);
+
+  }
+
+};
+
+
+// =============================================
+// SAVE PARCEL
+// =============================================
+
+window.firebaseSaveParcel = async function(parcel){
+
+  try{
+
+    await addDoc(
+      collection(db,"parcels"),
+      parcel
+    );
+
+    console.log("Parcel Saved To Firebase");
+
+  }catch(error){
+
+    console.log(error);
+
+  }
+
+};
 
 </script>
 </body>
