@@ -271,23 +271,37 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
 
 <div class="toast" id="toast"></div>
 
-<!-- AUTH USER -->
-<div class="auth-screen" id="auth-user">
+<!-- SINGLE AUTH SCREEN — Admin & User both login here -->
+<div class="auth-screen active" id="auth-user">
   <div class="auth-box">
     <div class="auth-logo">
       <div class="logo-mark"><svg viewBox="0 0 28 28" fill="none"><path d="M7 10h8l3 5H7V10z" fill="white" opacity=".9"/><path d="M15 10l3 5h3l-2-5h-4z" fill="white" opacity=".6"/><circle cx="10" cy="18" r="2" fill="white"/><circle cx="18" cy="18" r="2" fill="white"/></svg></div>
-      <h2>TRIX Courier</h2><p>Fast &amp; Reliable Delivery</p>
+      <h2>TRIX Courier</h2>
+      <p>Fast &amp; Reliable Delivery</p>
     </div>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
       <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
     </div>
+
+    <!-- LOGIN FORM -->
     <div class="auth-form active" id="form-login">
-      <div class="auth-field"><label>Email</label><input type="email" id="login-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <div class="auth-field"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="auth-field">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
       <button class="auth-btn" id="login-btn" onclick="doLogin()">Login to TRIX</button>
       <div class="auth-err" id="login-err"></div>
+      <!-- Small hint — no dedicated admin screen needed -->
+      <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--muted)">
+      </div>
     </div>
+
+    <!-- REGISTER FORM -->
     <div class="auth-form" id="form-register">
       <div class="auth-field"><label>Full Name</label><input type="text" id="reg-name" placeholder="Muhammad Ali"></div>
       <div class="auth-field"><label>Email</label><input type="email" id="reg-email" placeholder="your@email.com"></div>
@@ -296,22 +310,6 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
       <button class="auth-btn" id="reg-btn" onclick="doRegister()">Create Account</button>
       <div class="auth-err" id="reg-err"></div>
     </div>
-    <div class="admin-login-link"><a onclick="showAdminAuth()">Admin Login →</a></div>
-  </div>
-</div>
-
-<!-- AUTH ADMIN -->
-<div class="auth-screen" id="auth-admin">
-  <div class="auth-box">
-    <div class="auth-logo">
-      <div class="logo-mark" style="background:var(--purple)"><svg viewBox="0 0 28 28" fill="none"><path d="M14 6l2 5h5l-4 3 1.5 5L14 17l-4.5 2 1.5-5-4-3h5z" fill="white"/></svg></div>
-      <h2>TRIX Admin</h2><p>Administrator Access</p>
-    </div>
-    <div class="auth-field"><label>Admin Email</label><input type="email" id="admin-email" placeholder="admin@trix.com" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
-    <div class="auth-field"><label>Password</label><input type="password" id="admin-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
-    <button class="auth-btn" id="admin-btn" style="background:var(--purple)" onclick="doAdminLogin()">Login as Admin</button>
-    <div class="auth-err" id="admin-err"></div>
-    <div class="admin-login-link" style="margin-top:12px"><a onclick="showUserAuth()">← Back to User Login</a></div>
   </div>
 </div>
 
@@ -546,6 +544,7 @@ const db   = firebase.database();
 //  CONSTANTS
 // ══════════════════════════════════════════
 const ADMIN_EMAIL = 'admin@trix.com';
+const ADMIN_PASS  = 'admin@trix123';
 const CITIES = ['Karachi','Lahore','Islamabad','Rawalpindi','Faisalabad','Multan','Peshawar','Quetta','Hyderabad','Sialkot','Gujranwala','Sukkur','Bahawalpur','Abbottabad','Sargodha','Dera Ghazi Khan','Mardan','Larkana','Sheikhupura','Jhang','Rahim Yar Khan','Gujrat','Kasur','Mingora','Nawabshah'];
 const STATUSES = [
   {key:'Booked',cls:'b-booked'},{key:'Picked',cls:'b-picked'},{key:'In-Transit',cls:'b-transit'},
@@ -615,11 +614,21 @@ function populateStatusFilters(){
 auth.onAuthStateChanged(async fbUser=>{
   if(fbUser){
     currentUser=fbUser;
+    // Load profile from DB — role (admin/user) is stored there
     const snap=await db.ref('users/'+fbUser.uid).once('value');
-    userProfile=snap.exists()?snap.val():{name:'TRIX Admin',email:fbUser.email,role:'admin'};
+    if(snap.exists()){
+      userProfile=snap.val();
+    } else {
+      // Fallback: if no DB profile but email matches admin — treat as admin
+      // This handles the case where admin was created in Firebase Console manually
+      userProfile={
+        name:'TRIX Admin',
+        email:fbUser.email,
+        role: fbUser.email.toLowerCase()===ADMIN_EMAIL ? 'admin' : 'user'
+      };
+    }
     setLoading(false);
     document.getElementById('auth-user').classList.remove('active');
-    document.getElementById('auth-admin').classList.remove('active');
     document.getElementById('app').classList.add('active');
     setupUI();
     attachParcelsListener();
@@ -636,20 +645,20 @@ auth.onAuthStateChanged(async fbUser=>{
 });
 
 // ══════════════════════════════════════════
-//  FIX 3 — REAL-TIME LISTENER (loads ALL parcels for user correctly)
+//  REAL-TIME LISTENER
+//  Always load ALL parcels from Firebase.
+//  Filtering by user is done in JS so we
+//  don't depend on Firebase index rules.
 // ══════════════════════════════════════════
 function attachParcelsListener(){
   if(parcelsRef){parcelsRef.off();}
-  // Use full parcels node for admin; filter by userId for regular users
-  const ref = isAdmin()
-    ? db.ref('parcels')
-    : db.ref('parcels').orderByChild('userId').equalTo(currentUser.uid);
-  parcelsRef=ref;
-  ref.on('value', snap=>{
+  // Always listen to full /parcels node
+  parcelsRef = db.ref('parcels');
+  parcelsRef.on('value', snap=>{
     allParcels=[];
     snap.forEach(child=>{
       const d=child.val();
-      // Normalise timeline: Firebase may store it as object not array
+      // Normalise timeline: Firebase stores arrays as objects
       if(d.timeline && !Array.isArray(d.timeline)){
         d.timeline=Object.values(d.timeline).sort((a,b)=>new Date(a.time)-new Date(b.time));
       }
@@ -677,6 +686,41 @@ function attachUsersListener(){
 }
 
 // ══════════════════════════════════════════
+//  AUTO-CREATE ADMIN ACCOUNT IN FIREBASE
+//  Runs once on app load. If admin@trix.com
+//  doesn't exist in Auth yet, it creates it.
+// ══════════════════════════════════════════
+async function ensureAdminExists(){
+  try{
+    // Try signing in silently to check if admin exists
+    await auth.signInWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PASS);
+    // If it worked, sign back out — we don't want to auto-login as admin
+    await auth.signOut();
+  }catch(e){
+    if(e.code==='auth/user-not-found' || e.code==='auth/invalid-credential' || e.code==='auth/wrong-password'){
+      // Admin does not exist yet — create it
+      try{
+        const cred = await auth.createUserWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PASS);
+        // Save admin profile in Realtime Database
+        await db.ref('users/'+cred.user.uid).set({
+          name:'TRIX Admin',
+          email:ADMIN_EMAIL,
+          role:'admin',
+          createdAt:new Date().toISOString()
+        });
+        await auth.signOut();
+        console.log('✅ Admin account created successfully.');
+      }catch(createErr){
+        // Already exists or other error — safe to ignore
+        console.log('Admin setup note:', createErr.message);
+        try{ await auth.signOut(); }catch(_){}
+      }
+    }
+    // Any other error (network etc) — ignore, admin may already exist
+  }
+}
+
+// ══════════════════════════════════════════
 //  AUTH FUNCTIONS
 // ══════════════════════════════════════════
 function switchAuthTab(t){
@@ -685,47 +729,64 @@ function switchAuthTab(t){
   document.querySelectorAll('.auth-tab')[t==='login'?0:1].classList.add('active');
   document.getElementById('form-'+t).classList.add('active');
 }
-function showAdminAuth(){document.getElementById('auth-user').classList.remove('active');document.getElementById('auth-admin').classList.add('active');}
-function showUserAuth(){document.getElementById('auth-admin').classList.remove('active');document.getElementById('auth-user').classList.add('active');}
+
+// UNIFIED LOGIN — works for both Admin and regular User
+// System automatically detects role from Firebase DB profile
+async function doLogin(){
+  const email=v('login-email'),pass=document.getElementById('login-pass').value;
+  if(!email||!pass){showErr('login-err','Email aur password daalen.');return;}
+  hideErr('login-err');
+  setBtnLoading('login-btn',true,'Login to TRIX');
+  try{
+    await auth.signInWithEmailAndPassword(email.trim(),pass);
+    // onAuthStateChanged will handle the rest — load profile, set role, show dashboard
+  }catch(e){
+    showErr('login-err',fbErr(e));
+    setBtnLoading('login-btn',false,'Login to TRIX');
+  }
+}
 
 async function doRegister(){
   const name=v('reg-name'),email=v('reg-email'),phone=v('reg-phone'),pass=document.getElementById('reg-pass').value;
-  if(!name||!email||!phone||!pass){showErr('reg-err','All fields are required.');return;}
-  if(pass.length<6){showErr('reg-err','Password must be at least 6 characters.');return;}
-  hideErr('reg-err');setBtnLoading('reg-btn',true);
+  if(!name||!email||!phone||!pass){showErr('reg-err','Sab fields bharein.');return;}
+  if(pass.length<6){showErr('reg-err','Password kam az kam 6 characters ka hona chahiye.');return;}
+  hideErr('reg-err');setBtnLoading('reg-btn',true,'Create Account');
   try{
-    const cred=await auth.createUserWithEmailAndPassword(email,pass);
-    await db.ref('users/'+cred.user.uid).set({name,email,phone,role:'user',createdAt:new Date().toISOString()});
-  }catch(e){showErr('reg-err',fbErr(e));setBtnLoading('reg-btn',false,'Create Account');}
+    const cred=await auth.createUserWithEmailAndPassword(email.trim(),pass);
+    await db.ref('users/'+cred.user.uid).set({
+      name,email:email.trim(),phone,role:'user',
+      createdAt:new Date().toISOString()
+    });
+    // onAuthStateChanged handles the rest
+  }catch(e){
+    showErr('reg-err',fbErr(e));
+    setBtnLoading('reg-btn',false,'Create Account');
+  }
 }
-async function doLogin(){
-  const email=v('login-email'),pass=document.getElementById('login-pass').value;
-  if(!email||!pass){showErr('login-err','Enter email and password.');return;}
-  hideErr('login-err');setBtnLoading('login-btn',true);
-  try{await auth.signInWithEmailAndPassword(email,pass);}
-  catch(e){showErr('login-err',fbErr(e));setBtnLoading('login-btn',false,'Login to TRIX');}
-}
-async function doAdminLogin(){
-  const email=v('admin-email'),pass=document.getElementById('admin-pass').value;
-  if(!email||!pass){showErr('admin-err','Enter credentials.');return;}
-  hideErr('admin-err');setBtnLoading('admin-btn',true);
-  try{
-    await auth.signInWithEmailAndPassword(email,pass);
-    if(email.toLowerCase()!==ADMIN_EMAIL){
-      await auth.signOut();
-      showErr('admin-err','Not an admin account.');
-      setBtnLoading('admin-btn',false,'Login as Admin');
-    }
-  }catch(e){showErr('admin-err',fbErr(e));setBtnLoading('admin-btn',false,'Login as Admin');}
-}
+
 async function doLogout(){
   if(parcelsRef){parcelsRef.off();parcelsRef=null;}
   if(usersRef){usersRef.off();usersRef=null;}
   await auth.signOut();
+  // Reset login form
+  ['login-email','login-pass','reg-name','reg-email','reg-phone','reg-pass']
+    .forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  hideErr('login-err');hideErr('reg-err');
+  switchAuthTab('login');
 }
+
 function fbErr(e){
-  const m={'auth/invalid-email':'Invalid email.','auth/user-not-found':'No account found.','auth/wrong-password':'Incorrect password.','auth/email-already-in-use':'Email already registered.','auth/weak-password':'Password too weak.','auth/too-many-requests':'Too many attempts. Try later.','auth/invalid-credential':'Invalid email or password.'};
-  return m[e.code]||e.message||'An error occurred.';
+  const m={
+    'auth/invalid-email':'Email address galat hai.',
+    'auth/user-not-found':'Is email ka koi account nahi mila.',
+    'auth/wrong-password':'Password galat hai.',
+    'auth/email-already-in-use':'Yeh email pehle se registered hai.',
+    'auth/weak-password':'Password bahut chhota hai.',
+    'auth/too-many-requests':'Bahut zyada attempts. Thodi der baad try karein.',
+    'auth/network-request-failed':'Network error. Internet check karein.',
+    'auth/invalid-credential':'Email ya password galat hai.',
+  };
+  return m[e.code]||e.message||'Koi error aa gai.';
 }
 
 // ══════════════════════════════════════════
@@ -760,7 +821,7 @@ function showPage(p){
 //  HOME STATS
 // ══════════════════════════════════════════
 function updateHomeStats(){
-  const pp=isAdmin()?allParcels:allParcels.filter(x=>x.userId===currentUser?.uid);
+  const pp=getMyParcels();
   document.getElementById('s-total').textContent    =pp.length;
   document.getElementById('s-delivered').textContent=pp.filter(x=>x.status==='Delivered').length;
   document.getElementById('s-transit').textContent  =pp.filter(x=>x.status==='In-Transit').length;
@@ -770,9 +831,12 @@ function updateHomeStats(){
 // ══════════════════════════════════════════
 //  BOOKING
 // ══════════════════════════════════════════
+// Returns only parcels belonging to the logged-in user.
+// Admin sees ALL. Regular user sees ONLY their own (strict userId match).
 function getMyParcels(){
-  if(!currentUser)return[];
-  return isAdmin()?allParcels:allParcels.filter(p=>p.userId===currentUser.uid);
+  if(!currentUser) return [];
+  if(isAdmin()) return allParcels;
+  return allParcels.filter(p => p.userId === currentUser.uid);
 }
 async function genUniqueId(){
   let id,exists=true;
@@ -927,7 +991,8 @@ function getFilteredBookings(){
   const tid=v('f-tid').toUpperCase(),sh=v('f-shipper').toLowerCase(),
         cn=v('f-consignee').toLowerCase(),cy=v('f-city').toLowerCase(),
         st=v('f-status'),dt=v('f-date');
-  const base=isAdmin()?allParcels:allParcels.filter(p=>p.userId===currentUser?.uid);
+  // getMyParcels() already enforces user isolation
+  const base=getMyParcels();
   return base.filter(p=>{
     if(tid&&!p.id.includes(tid))return false;
     if(sh&&!p.sName?.toLowerCase().includes(sh))return false;
@@ -1093,7 +1158,8 @@ function getExportData(ns){
     const tid=v('f-tid').toUpperCase(),sh=v('f-shipper').toLowerCase(),
           cn=v('f-consignee').toLowerCase(),cy=v('f-city').toLowerCase(),
           st=v('f-status'),dt=v('f-date');
-    const base=isAdmin()?allParcels:allParcels.filter(p=>p.userId===currentUser?.uid);
+    // getMyParcels() enforces user isolation — users only export their own data
+    const base=getMyParcels();
     data=base.filter(p=>{
       if(tid&&!p.id.includes(tid))return false;
       if(sh&&!p.sName?.toLowerCase().includes(sh))return false;
@@ -1330,10 +1396,13 @@ async function printSlip(parcelId){
 // ══════════════════════════════════════════
 //  DOM READY
 // ══════════════════════════════════════════
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded', async ()=>{
   populateCities();
   populateStatusFilters();
   setLoading('Connecting to Firebase…');
+  // Auto-create admin account if it doesn't exist yet
+  await ensureAdminExists();
+  // onAuthStateChanged will handle everything after this
 });
 </script>
 </body>
