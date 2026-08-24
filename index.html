@@ -777,14 +777,14 @@ async function doLogout(){
 
 function fbErr(e){
   const m={
-    'auth/invalid-email':'Email address galat hai.',
-    'auth/user-not-found':'Is email ka koi account nahi mila.',
-    'auth/wrong-password':'Password galat hai.',
-    'auth/email-already-in-use':'Yeh email pehle se registered hai.',
-    'auth/weak-password':'Password bahut chhota hai.',
-    'auth/too-many-requests':'Bahut zyada attempts. Thodi der baad try karein.',
-    'auth/network-request-failed':'Network error. Internet check karein.',
-    'auth/invalid-credential':'Email ya password galat hai.',
+    'auth/invalid-email':'The email address is incorrect.',
+    'auth/user-not-found':'No account was found for this email.',
+    'auth/wrong-password':'Wrong Password',
+    'auth/email-already-in-use':'This email is already registered.',
+    'auth/weak-password':'Weak Password',
+    'auth/too-many-requests':'Too many attempts. Try Later.',
+    'auth/network-request-failed':'Network error. Check your Internet',
+    'auth/invalid-credential':'Check credentials',
   };
   return m[e.code]||e.message||'Koi error aa gai.';
 }
