@@ -275,8 +275,10 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
 <div class="auth-screen active" id="auth-user">
   <div class="auth-box">
     <div class="auth-logo">
-      <div class="logo-mark"><svg viewBox="0 0 28 28" fill="none"><path d="M7 10h8l3 5H7V10z" fill="white" opacity=".9"/><path d="M15 10l3 5h3l-2-5h-4z" fill="white" opacity=".6"/><circle cx="10" cy="18" r="2" fill="white"/><circle cx="18" cy="18" r="2" fill="white"/></svg></div>
-      <h2>TRIX Courier</h2>
+      <div class="logo-mark" id="auth-logo-mark">
+        <svg viewBox="0 0 28 28" fill="none"><path d="M7 10h8l3 5H7V10z" fill="white" opacity=".9"/><path d="M15 10l3 5h3l-2-5h-4z" fill="white" opacity=".6"/><circle cx="10" cy="18" r="2" fill="white"/><circle cx="18" cy="18" r="2" fill="white"/></svg>
+      </div>
+      <h2>TRIX Courier Services</h2>
       <p>Fast &amp; Reliable Delivery</p>
     </div>
     <div class="auth-tabs">
@@ -298,6 +300,7 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
       <div class="auth-err" id="login-err"></div>
       <!-- Small hint — no dedicated admin screen needed -->
       <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--muted)">
+        Admin aur User dono yahan se login kar saktay hain
       </div>
     </div>
 
@@ -318,7 +321,9 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
 <nav>
   <div class="nav-inner">
     <div class="nav-logo" onclick="showPage('home')">
-      <div class="logo-box"><svg viewBox="0 0 28 28" fill="none"><path d="M7 10h8l3 5H7V10z" fill="white" opacity=".9"/><path d="M15 10l3 5h3l-2-5h-4z" fill="white" opacity=".6"/><circle cx="10" cy="18" r="2" fill="white"/><circle cx="18" cy="18" r="2" fill="white"/></svg></div>
+      <div class="logo-box" id="nav-logo-box">
+        <svg viewBox="0 0 28 28" fill="none"><path d="M7 10h8l3 5H7V10z" fill="white" opacity=".9"/><path d="M15 10l3 5h3l-2-5h-4z" fill="white" opacity=".6"/><circle cx="10" cy="18" r="2" fill="white"/><circle cx="18" cy="18" r="2" fill="white"/></svg>
+      </div>
       <span class="logo-text">TRIX</span>
     </div>
     <div class="nav-links">
@@ -326,7 +331,7 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
       <button class="nav-link" onclick="showPage('book')" id="nl-book">Book</button>
       <button class="nav-link" onclick="showPage('track')" id="nl-track">Track</button>
       <button class="nav-link" onclick="showPage('bookings')" id="nl-bookings">Bookings</button>
-      <button class="nav-link" onclick="showPage('history')" id="nl-history">History</button>
+      <button class="nav-link" onclick="showPage('history')" id="nl-history">Orders Detail</button>
       <button class="nav-link" onclick="showPage('admin')" id="nl-admin" style="display:none;color:var(--purple)">Admin Panel</button>
     </div>
     <div class="nav-right">
@@ -410,7 +415,14 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
         <select id="pType"><option value="">Select Type</option><option>Documents</option><option>Electronics</option><option>Clothing</option><option>Food</option><option>Medicine</option><option>Cosmetics</option><option>Fragile</option><option>Other</option></select>
       </div>
       <div class="form-group full"><label>Item Description *</label><input type="text" id="itemDesc" placeholder="e.g. Mobile Accessories, Clothes, Documents, Shoes…"></div>
-      <div class="form-group"><label>COD Amount (PKR)</label><input type="number" id="codAmount" placeholder="0 if not COD" min="0"></div>
+      <div class="form-group"><label>Service Type *</label>
+        <select id="serviceType" onchange="onServiceTypeChange()">
+          <option value="">Select Service Type</option>
+          <option value="COD">COD</option>
+          <option value="Prepaid">Prepaid</option>
+        </select>
+      </div>
+      <div class="form-group"><label id="svcAmountLabel">Amount (PKR) *</label><input type="number" id="svcAmount" placeholder="Select service type first" min="0" step="1" disabled></div>
       <div class="form-group"><label>Parcel Value (PKR)</label><input type="number" id="parcelValue" placeholder="Declared value" min="0"></div>
       <div class="form-group full"><label>Notes</label><input type="text" id="notes" placeholder="Fragile, Handle with care, etc."></div>
     </div>
@@ -470,12 +482,33 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
   </div>
 </div>
 
-<!-- HISTORY -->
+<!-- ORDERS DETAIL -->
 <div class="page" id="page-history">
   <div class="card" style="margin-top:22px">
-    <div class="card-title">Booking History</div>
-    <div class="card-sub" id="history-sub">Click any parcel to view full details</div>
-    <div id="history-list"></div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px">
+      <div>
+        <div class="card-title">Orders Detail</div>
+        <div class="card-sub" id="history-sub" style="margin-bottom:0">All your orders with slip printing</div>
+      </div>
+    </div>
+    <div class="table-toolbar" style="margin-top:16px">
+      <div class="toolbar-left">
+        <span id="ord-count-label" style="font-size:13px;color:var(--muted)">0 orders</span>
+        <span id="ord-sel-label" style="display:none;color:var(--blue);font-weight:600;font-size:13px"></span>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn btn-primary btn-sm" onclick="printSelectedSlips()">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="10" width="10" height="5" rx="1" stroke="white" stroke-width="1.5"/><path d="M3 10V5h10v5M5 1h6v4H5z" stroke="white" stroke-width="1.5"/></svg>
+          Print Selected Slips
+        </button>
+        <button class="btn btn-success btn-sm" onclick="exportExcel('bookings')">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="14" height="12" rx="2" stroke="white" stroke-width="1.5"/><path d="M5 8h6M8 5V2" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>Export Excel
+        </button>
+      </div>
+    </div>
+    <div class="table-wrap" id="orders-table-wrap">
+      <div class="no-result"><div class="nr-icon">📋</div><p>Loading orders…</p></div>
+    </div>
   </div>
   <div id="history-detail"></div>
 </div>
@@ -545,6 +578,30 @@ const db   = firebase.database();
 // ══════════════════════════════════════════
 const ADMIN_EMAIL = 'admin@trix.com';
 const ADMIN_PASS  = 'admin@trix123';
+
+// ── LOGO ──────────────────────────────────
+// Change 3: Paste your Firebase Storage image URL here.
+// How to get it:
+//   Firebase Console → Storage → Upload your logo image
+//   → Click the image → Copy "Download URL"
+//   → Paste it below replacing the empty string
+// Leave empty ('') to use the default icon.
+const LOGO_URL = '';  // e.g. 'https://firebasestorage.googleapis.com/v0/b/trix-db.appspot.com/o/logo.png?alt=media&token=...'
+
+function applyLogo(){
+  if(!LOGO_URL) return;
+  const box = document.getElementById('nav-logo-box');
+  if(box){
+    box.style.cssText='width:38px;height:38px;border-radius:9px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:transparent';
+    box.innerHTML=`<img src="${LOGO_URL}" style="width:38px;height:38px;object-fit:contain;border-radius:8px" onerror="this.parentElement.innerHTML='<svg viewBox=\\'0 0 28 28\\' fill=\\'none\\'><path d=\\'M7 10h8l3 5H7V10z\\' fill=\\'white\\' opacity=\\'.9\\'/><path d=\\'M15 10l3 5h3l-2-5h-4z\\' fill=\\'white\\' opacity=\\'.6\\'/><circle cx=\\'10\\' cy=\\'18\\' r=\\'2\\' fill=\\'white\\'/><circle cx=\\'18\\' cy=\\'18\\' r=\\'2\\' fill=\\'white\\'/></svg>'">`;
+  }
+  // Also apply to auth logo
+  const authMark = document.querySelector('.auth-logo .logo-mark');
+  if(authMark){
+    authMark.style.cssText='width:52px;height:52px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;background:transparent;margin-bottom:10px';
+    authMark.innerHTML=`<img src="${LOGO_URL}" style="width:52px;height:52px;object-fit:contain" onerror="this.style.display='none'">`;
+  }
+}
 const CITIES = ['Karachi','Lahore','Islamabad','Rawalpindi','Faisalabad','Multan','Peshawar','Quetta','Hyderabad','Sialkot','Gujranwala','Sukkur','Bahawalpur','Abbottabad','Sargodha','Dera Ghazi Khan','Mardan','Larkana','Sheikhupura','Jhang','Rahim Yar Khan','Gujrat','Kasur','Mingora','Nawabshah'];
 const STATUSES = [
   {key:'Booked',cls:'b-booked'},{key:'Picked',cls:'b-picked'},{key:'In-Transit',cls:'b-transit'},
@@ -777,14 +834,14 @@ async function doLogout(){
 
 function fbErr(e){
   const m={
-    'auth/invalid-email':'The email address is incorrect.',
-    'auth/user-not-found':'No account was found for this email.',
-    'auth/wrong-password':'Wrong Password',
-    'auth/email-already-in-use':'This email is already registered.',
-    'auth/weak-password':'Weak Password',
-    'auth/too-many-requests':'Too many attempts. Try Later.',
-    'auth/network-request-failed':'Network error. Check your Internet',
-    'auth/invalid-credential':'Check credentials',
+    'auth/invalid-email':'Email address galat hai.',
+    'auth/user-not-found':'Is email ka koi account nahi mila.',
+    'auth/wrong-password':'Password galat hai.',
+    'auth/email-already-in-use':'Yeh email pehle se registered hai.',
+    'auth/weak-password':'Password bahut chhota hai.',
+    'auth/too-many-requests':'Bahut zyada attempts. Thodi der baad try karein.',
+    'auth/network-request-failed':'Network error. Internet check karein.',
+    'auth/invalid-credential':'Email ya password galat hai.',
   };
   return m[e.code]||e.message||'Koi error aa gai.';
 }
@@ -847,17 +904,54 @@ async function genUniqueId(){
   }
   return id;
 }
+// Service type helpers (old parcels without serviceType fall back to COD/Prepaid by amount)
+const svcType   = p => p.serviceType || (p.cod>0 ? 'COD' : 'Prepaid');
+const svcAmount = p => svcType(p)==='COD' ? (Number(p.cod)||0) : (Number(p.dcCharged)||0);
+const svcAmtLabel = p => svcType(p)==='COD' ? 'COD Amount' : 'DC Charged';
+
+function onServiceTypeChange(){
+  const t=document.getElementById('serviceType').value;
+  const lbl=document.getElementById('svcAmountLabel');
+  const inp=document.getElementById('svcAmount');
+  inp.value='';inp.classList.remove('err');
+  if(t==='COD'){
+    lbl.textContent='COD Amount (PKR) *';
+    inp.placeholder='Amount to collect from consignee';
+    inp.disabled=false;
+  }else if(t==='Prepaid'){
+    lbl.textContent='DC Charged (PKR) *';
+    inp.placeholder='Enter delivery charges';
+    inp.disabled=false;
+  }else{
+    lbl.textContent='Amount (PKR) *';
+    inp.placeholder='Select service type first';
+    inp.disabled=true;
+  }
+}
+
 async function bookParcel(){
   const req=[
     ['sName','Shipper Name'],['sPhone','Shipper Phone'],['sCity','Shipper City'],['sAddr','Shipper Address'],
     ['rName','Consignee Name'],['rPhone','Consignee Phone'],['rCity','Consignee City'],['rAddr','Consignee Address'],
-    ['weight','Weight'],['pType','Parcel Type'],['itemDesc','Item Description']
+    ['weight','Weight'],['pType','Parcel Type'],['itemDesc','Item Description'],
+    ['serviceType','Service Type']
   ];
   document.querySelectorAll('#page-book input,#page-book select').forEach(e=>e.classList.remove('err'));
   let err=null;
   for(const[id,lbl]of req){const e=document.getElementById(id);if(!e?.value?.trim()){e?.classList.add('err');if(!err)err=lbl+' is required.';}}
   const we=document.getElementById('weight');
   if(!err&&(isNaN(parseFloat(we.value))||parseFloat(we.value)<=0)){we.classList.add('err');err='Weight must be a positive number.';}
+  // Amount box: COD Amount (must be > 0) or DC Charged (0 or more) — required either way
+  const stSel=document.getElementById('serviceType').value;
+  const amtEl=document.getElementById('svcAmount');
+  if(!err&&stSel){
+    const amtVal=parseFloat(amtEl.value);
+    const amtName=stSel==='COD'?'COD Amount':'DC Charged';
+    if(amtEl.value.trim()===''||isNaN(amtVal)||amtVal<0||(stSel==='COD'&&amtVal<=0)){
+      amtEl.classList.add('err');
+      err=amtName+(stSel==='COD'?' must be greater than 0.':' is required.');
+    }
+  }
   const al=document.getElementById('book-alert');
   if(err){al.className='alert alert-error show';al.innerHTML='<strong>Validation Error:</strong> '+err;return;}
   setBtnLoading('book-btn',true);
@@ -869,7 +963,9 @@ async function bookParcel(){
       rName:v('rName'),rPhone:v('rPhone'),rCity:v('rCity'),rAddr:v('rAddr'),
       weight:parseFloat(document.getElementById('weight').value),
       type:v('pType'),itemDesc:v('itemDesc'),
-      cod:parseFloat(document.getElementById('codAmount').value)||0,
+      serviceType:stSel,
+      cod:stSel==='COD'?(parseFloat(amtEl.value)||0):0,
+      dcCharged:stSel==='Prepaid'?(parseFloat(amtEl.value)||0):0,
       value:parseFloat(document.getElementById('parcelValue').value)||0,
       notes:v('notes')||'None',
       status:'Booked',timeline:[{status:'Booked',time:now}],createdAt:now
@@ -887,8 +983,9 @@ async function bookParcel(){
   setBtnLoading('book-btn',false,'Book Parcel');
 }
 function clearBookForm(){
-  ['sName','sPhone','sAddr','rName','rPhone','rAddr','weight','codAmount','parcelValue','notes','itemDesc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
-  ['sCity','rCity','pType'].forEach(id=>{const e=document.getElementById(id);if(e)e.selectedIndex=0;});
+  ['sName','sPhone','sAddr','rName','rPhone','rAddr','weight','svcAmount','parcelValue','notes','itemDesc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['sCity','rCity','pType','serviceType'].forEach(id=>{const e=document.getElementById(id);if(e)e.selectedIndex=0;});
+  onServiceTypeChange();
   document.querySelectorAll('#page-book input,#page-book select').forEach(e=>e.classList.remove('err'));
 }
 
@@ -953,7 +1050,8 @@ function renderParcelCard(p,canEdit=false){
         <div class="pd-info-item"><div class="pdi-label">Weight</div><div class="pdi-val">${p.weight} kg</div></div>
         <div class="pd-info-item"><div class="pdi-label">Parcel Type</div><div class="pdi-val">${p.type}</div></div>
         <div class="pd-info-item"><div class="pdi-label">Item Description</div><div class="pdi-val">${p.itemDesc||'—'}</div></div>
-        <div class="pd-info-item"><div class="pdi-label">COD Amount</div><div class="pdi-val">${pkr(p.cod)}</div></div>
+        <div class="pd-info-item"><div class="pdi-label">Service Type</div><div class="pdi-val">${svcType(p)}</div></div>
+        <div class="pd-info-item"><div class="pdi-label">${svcAmtLabel(p)}</div><div class="pdi-val">${pkr(svcAmount(p))}</div></div>
         <div class="pd-info-item"><div class="pdi-label">Parcel Value</div><div class="pdi-val">${pkr(p.value)}</div></div>
         <div class="pd-info-item"><div class="pdi-label">Notes</div><div class="pdi-val">${p.notes||'—'}</div></div>
       </div>
@@ -1019,9 +1117,9 @@ function renderBookingsTable(){
   const allChk=bkTableData.every(p=>sel.has(p.id));
   wrap.innerHTML=`<table class="wide"><thead><tr>
     <th class="th-check"><input type="checkbox" ${allChk?'checked':''} onchange="toggleAll('bk',this.checked)"></th>
-    <th>Tracking ID</th><th>Date</th><th>Shipper Name</th><th>Shipper City</th>
+    <th>Tracking ID</th><th>Booking Date</th><th>Shipper Name</th><th>Shipper City</th>
     <th>Consignee Name</th><th>Consignee City</th><th>Weight</th><th>Parcel Type</th>
-    <th>Item Description</th><th>COD Amount</th><th>Parcel Value</th><th>Status</th>
+    <th>Item Description</th><th>Service Type</th><th>COD / DC Amount</th><th>Parcel Value</th><th>Status</th><th>Delivery Date</th>
   </tr></thead><tbody>${bkTableData.map(p=>`<tr class="${sel.has(p.id)?'row-selected':''}" id="bkr-${p.id}">
     <td class="td-check"><input type="checkbox" ${sel.has(p.id)?'checked':''} onchange="onChk('bk','${p.id}',this)"></td>
     <td class="td-id" onclick="openTrackById('${p.id}')">${p.id}</td>
@@ -1030,8 +1128,9 @@ function renderBookingsTable(){
     <td>${p.rName}</td><td>${p.rCity}</td>
     <td>${p.weight}kg</td><td>${p.type}</td>
     <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${p.itemDesc||'—'}</td>
-    <td>${pkr(p.cod)}</td><td>${pkr(p.value)}</td>
+    <td>${svcType(p)}</td><td>${pkr(svcAmount(p))}${svcAmount(p)>0?' <span style="font-size:10px;color:var(--muted)">'+(svcType(p)==='COD'?'COD':'DC')+'</span>':''}</td><td>${pkr(p.value)}</td>
     <td>${badge(p.status)}</td>
+    <td style="color:${getDeliveryDate(p)==='—'?'var(--muted)':'var(--green)'};font-weight:${getDeliveryDate(p)==='—'?'400':'600'};white-space:nowrap">${getDeliveryDate(p)}</td>
   </tr>`).join('')}</tbody></table>`;
 }
 
@@ -1052,31 +1151,398 @@ function onChk(ns,id,el){
 }
 
 // ══════════════════════════════════════════
-//  FIX 3 — HISTORY (uses getMyParcels which reads from the live allParcels array)
+//  ORDERS DETAIL (was History)
+//  Change 1: table view with checkboxes + counts + print slip per row
+//  Change 2: delivery date column
 // ══════════════════════════════════════════
+const ordSelectedSet = new Set();
+
+function getDeliveryDate(p){
+  // Find the first timeline entry where status is 'Delivered'
+  const tl = Array.isArray(p.timeline) ? p.timeline : Object.values(p.timeline||{});
+  const entry = tl.find(t=>t.status==='Delivered');
+  return entry ? fmt(entry.time) : '—';
+}
+
 function renderHistory(){
-  const pp=getMyParcels(); // FIX 3: always reads from allParcels live cache
-  document.getElementById('history-sub').textContent=isAdmin()?`All parcels (${pp.length})`:`Your parcels (${pp.length})`;
-  const list=document.getElementById('history-list');
-  document.getElementById('history-detail').innerHTML='';
+  const pp = getMyParcels();
+  document.getElementById('history-sub').textContent = isAdmin()?`All orders (${pp.length})`:`Your orders (${pp.length})`;
+  document.getElementById('history-detail').innerHTML = '';
+  const wrap = document.getElementById('orders-table-wrap');
+  const cnt = document.getElementById('ord-count-label');
+  const slbl = document.getElementById('ord-sel-label');
+  if(cnt) cnt.textContent = `${pp.length} order${pp.length!==1?'s':''}`;
+
   if(!pp.length){
-    list.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">📦</div><p>No parcels yet.</p><button class="btn btn-primary" style="margin-top:12px" onclick="showPage(\'book\')">Book Your First Parcel</button></div>';
+    wrap.innerHTML='<div class="no-result"><div class="nr-icon">📦</div><p>No orders yet.</p><button class="btn btn-primary" style="margin-top:12px" onclick="showPage(\'book\')">Book Your First Parcel</button></div>';
     return;
   }
-  list.innerHTML='<div style="display:flex;flex-direction:column;gap:10px">'+
-    pp.map(p=>`<div style="background:white;border-radius:var(--radius-sm);padding:13px 16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;flex-wrap:wrap;cursor:pointer;transition:box-shadow .15s" onclick="renderHistoryDetail('${p.id}')" onmouseenter="this.style.boxShadow='var(--shadow-lg)'" onmouseleave="this.style.boxShadow='var(--shadow)'">
-      <div style="font-family:monospace;font-weight:700;color:var(--blue);font-size:13px;min-width:100px">${p.id}</div>
-      <div style="flex:1;font-size:13px;color:var(--muted)"><strong style="color:var(--text)">${p.sName}</strong> → ${p.rName}</div>
-      <div style="font-size:13px;color:var(--muted)">${p.sCity} → ${p.rCity}</div>
-      ${badge(p.status)}
-      <div style="font-size:12px;color:var(--muted)">${fmt(p.createdAt)}</div>
-    </div>`).join('')+
-  '</div>';
+
+  const allChk = pp.every(p=>ordSelectedSet.has(p.id));
+  wrap.innerHTML=`<table class="wide">
+    <thead><tr>
+      <th class="th-check"><input type="checkbox" id="ord-chk-all" ${allChk?'checked':''} onchange="toggleAllOrders(this.checked)"></th>
+      <th>#</th>
+      <th>Tracking ID</th>
+      <th>Booking Date</th>
+      <th>Shipper</th>
+      <th>Shipper City</th>
+      <th>Consignee</th>
+      <th>Consignee City</th>
+      <th>Weight</th>
+      <th>Type</th>
+      <th>Item Desc</th>
+      <th>Service</th>
+      <th>COD / DC</th>
+      <th>Value</th>
+      <th>Status</th>
+      <th>Delivery Date</th>
+      <th>Slip</th>
+    </tr></thead>
+    <tbody>${pp.map((p,i)=>`<tr class="${ordSelectedSet.has(p.id)?'row-selected':''}" id="ordr-${p.id}">
+      <td class="td-check"><input type="checkbox" ${ordSelectedSet.has(p.id)?'checked':''} onchange="onOrdChk('${p.id}',this)"></td>
+      <td style="color:var(--muted);font-size:12px">${i+1}</td>
+      <td class="td-id" onclick="renderHistoryDetail('${p.id}')">${p.id}</td>
+      <td>${fmt(p.createdAt)}</td>
+      <td style="font-weight:500">${p.sName}</td>
+      <td>${p.sCity}</td>
+      <td style="font-weight:500">${p.rName}</td>
+      <td>${p.rCity}</td>
+      <td>${p.weight}kg</td>
+      <td>${p.type}</td>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis">${p.itemDesc||'—'}</td>
+      <td>${svcType(p)}</td>
+      <td>${pkr(svcAmount(p))}</td>
+      <td>${pkr(p.value)}</td>
+      <td>${badge(p.status)}</td>
+      <td style="color:${getDeliveryDate(p)==='—'?'var(--muted)':'var(--green)'};font-weight:${getDeliveryDate(p)==='—'?'400':'600'}">${getDeliveryDate(p)}</td>
+      <td><button class="btn btn-secondary btn-xs" onclick="openSlipById('${p.id}')">🖨️ Slip</button></td>
+    </tr>`).join('')}
+    </tbody>
+  </table>`;
 }
+
+function toggleAllOrders(checked){
+  const pp=getMyParcels();
+  pp.forEach(p=>checked?ordSelectedSet.add(p.id):ordSelectedSet.delete(p.id));
+  updateOrdSelLabel();
+  renderHistory();
+}
+
+function onOrdChk(id, el){
+  el.checked?ordSelectedSet.add(id):ordSelectedSet.delete(id);
+  const row=document.getElementById('ordr-'+id);
+  if(row) row.className=el.checked?'row-selected':'';
+  updateOrdSelLabel();
+}
+
+function updateOrdSelLabel(){
+  const slbl=document.getElementById('ord-sel-label');
+  const cnt=ordSelectedSet.size;
+  if(slbl) cnt>0?(slbl.style.display='',slbl.textContent=`(${cnt} selected)`):(slbl.style.display='none');
+}
+
 function renderHistoryDetail(id){
   const p=allParcels.find(x=>x.id===id);if(!p)return;
   document.getElementById('history-detail').innerHTML=renderParcelCard(p,isAdmin());
   document.getElementById('history-detail').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// Print slips for all selected orders (or show message if none selected)
+// ══════════════════════════════════════════
+//  UNIFIED SLIP PRINT SYSTEM
+//  3 slips per A4 page. If only 1 slip, it
+//  prints at the TOP of the page, rest blank.
+// ══════════════════════════════════════════
+
+// Converts a number into English words (for "Amount in Words" on the slip)
+function numberToWordsPKR(num){
+  num = Math.round(Number(num)||0);
+  if(num===0) return 'Zero Only';
+  const ones=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const tens=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  function chunk(n){
+    let s='';
+    if(n>=100){ s+=ones[Math.floor(n/100)]+' Hundred '; n%=100; }
+    if(n>=20){ s+=tens[Math.floor(n/10)]+' '; n%=10; }
+    if(n>0){ s+=ones[n]+' '; }
+    return s;
+  }
+  let n=num, out='';
+  const crore=Math.floor(n/10000000); n%=10000000;
+  const lakh=Math.floor(n/100000); n%=100000;
+  const thousand=Math.floor(n/1000); n%=1000;
+  if(crore) out+=chunk(crore)+'Crore ';
+  if(lakh) out+=chunk(lakh)+'Lakh ';
+  if(thousand) out+=chunk(thousand)+'Thousand ';
+  if(n) out+=chunk(n);
+  return out.trim()+' Only';
+}
+
+// Builds the compact HTML for ONE waybill-style slip slot
+function buildCompactSlipHTML(p, ids){
+  const now = new Date();
+  const st = svcType(p);                       // 'COD' or 'Prepaid'
+  const amt = svcAmount(p);                    // COD amount, or DC charged for Prepaid
+  const subSegment = st;
+  const paymentMode = st;
+  const amountLabel = st==='COD' ? 'Collection Amount' : 'DC Charged';
+  const collectionLine = `Rs ${Number(amt).toLocaleString()}`;
+  const amountWords = numberToWordsPKR(amt);
+
+  return `
+  <div class="wb">
+    <!-- ROW 1: Logo/Barcode | QR | Meta table -->
+    <div class="wb-row wb-top">
+      <div class="wb-col wb-logo-col">
+        <div class="wb-logo">
+          <svg viewBox="0 0 28 28" fill="none" width="20" height="20"><path d="M7 10h8l3 5H7V10z" fill="#0e9f6e" opacity=".9"/><path d="M15 10l3 5h3l-2-5h-4z" fill="#0e9f6e" opacity=".6"/><circle cx="10" cy="18" r="2" fill="#0e9f6e"/><circle cx="18" cy="18" r="2" fill="#0e9f6e"/></svg>
+          <span class="wb-logo-text">TRIX</span>
+        </div>
+        <div class="wb-barcode"><svg id="${ids.barcodeId}"></svg></div>
+        <div class="wb-tid">${p.id}</div>
+        <div class="wb-printedby">Printed By: TRIX (Shipper)</div>
+      </div>
+      <div class="wb-col wb-qr-col">
+        <div class="wb-qr" id="${ids.qrId}"></div>
+      </div>
+      <div class="wb-col wb-meta-col">
+        <table class="wb-meta-table">
+          <tr><td class="wb-mlbl">Datetime</td><td class="wb-mval" colspan="3">${fmtDT(now)}</td></tr>
+          <tr><td class="wb-mlbl">Order ID</td><td class="wb-mval">${p.id}</td><td class="wb-mlbl">Sub Area</td><td class="wb-mval">${p.rCity||'—'}</td></tr>
+          <tr><td class="wb-mlbl">Origin</td><td class="wb-mval">${p.sCity||'—'}</td><td class="wb-mlbl">Destination</td><td class="wb-mval">${p.rCity||'—'}</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- ROW 2: Shipper / Consignee headers -->
+    <div class="wb-row wb-half-headers">
+      <div class="wb-bar wb-half">Shipper</div>
+      <div class="wb-bar wb-half">Consignee</div>
+    </div>
+
+    <!-- ROW 3-5: Name / Address / Phone -->
+    <table class="wb-table">
+      <tr><td class="wb-lbl">Name</td><td class="wb-val">${p.sName}</td><td class="wb-lbl">Name</td><td class="wb-val">${p.rName}</td></tr>
+      <tr><td class="wb-lbl">Address</td><td class="wb-val">${p.sAddr||'—'}${p.sCity?', '+p.sCity:''}</td><td class="wb-lbl">Address</td><td class="wb-val">${p.rAddr||'—'}${p.rCity?', '+p.rCity:''}</td></tr>
+      <tr><td class="wb-lbl">Phone Number(s)</td><td class="wb-val">${p.sPhone}</td><td class="wb-lbl">Phone Number(s)</td><td class="wb-val">${p.rPhone}</td></tr>
+    </table>
+
+    <!-- ROW 6: Item block -->
+    <table class="wb-table">
+      <tr>
+        <td class="wb-lbl" rowspan="2">Item</td>
+        <td class="wb-val"><span class="wb-sub">Type</span> ${p.type}</td>
+        <td class="wb-lbl">Quantity</td>
+        <td class="wb-val">1 Piece(s)</td>
+      </tr>
+      <tr>
+        <td class="wb-val"><span class="wb-sub">Description</span> ${p.itemDesc||'—'}</td>
+        <td class="wb-lbl">Sub Segment</td>
+        <td class="wb-val">${subSegment}</td>
+      </tr>
+    </table>
+
+    <!-- ROW 7: Special Instructions / Payment Mode -->
+    <table class="wb-table">
+      <tr>
+        <td class="wb-lbl">Special Instruction(s)</td>
+        <td class="wb-val" colspan="2">${p.notes||'None'}</td>
+        <td class="wb-lbl">Payment Mode</td>
+        <td class="wb-val">${paymentMode}</td>
+      </tr>
+      <tr>
+        <td class="wb-lbl">${amountLabel}</td>
+        <td class="wb-val wb-cod">${collectionLine}</td>
+        <td class="wb-val wb-words" colspan="3">${amountWords}</td>
+      </tr>
+    </table>
+
+    <!-- ROW 8: Shipping Mode / Service headers -->
+    <div class="wb-row wb-half-headers">
+      <div class="wb-bar wb-half">Shipping Mode</div>
+      <div class="wb-bar wb-half">Service</div>
+    </div>
+    <div class="wb-row wb-half-values">
+      <div class="wb-bigval wb-half">Regular</div>
+      <div class="wb-bigval wb-half">${p.status==='Delivered'?'Delivered':'Regular'}</div>
+    </div>
+
+    <!-- ROW 9: Urdu disclaimer -->
+    <div class="wb-urdu">
+      براہ کرم پارسل وصول کرتے وقت اس کی جانچ پڑتال کر لیں، بعد میں کسی نقصان یا خرابی کی صورت میں ادارہ ذمہ دار نہیں ہوگا۔<br>
+      ترسیل میں تاخیر کی صورت میں موسم، ٹریفک یا حکومتی پابندیوں کی وجہ سے ادارہ ذمہ دار نہیں ہوگا۔
+    </div>
+  </div>`;
+}
+
+// Builds the full printable document: pages of 3 slip-slots each.
+// If parcels.length === 1, only the FIRST slot of the FIRST page
+// is filled — the rest of that page stays blank (top of paper).
+// Slot size stays EXACTLY the same (92.3mm) as before.
+function buildSlipsPrintDocument(parcels){
+  const pages = [];
+  for(let i=0;i<parcels.length;i+=3){
+    pages.push(parcels.slice(i,i+3));
+  }
+  if(pages.length===0) pages.push([]);
+
+  let counter=0;
+  const qrJobs=[];       // {id, text}
+  const barcodeJobs=[];  // {id, text}
+
+  const pagesHtml = pages.map(group=>{
+    const slots = [0,1,2].map(slotIdx=>{
+      const p = group[slotIdx];
+      if(!p) return `<div class="slip-slot slip-slot-empty"></div>`;
+      counter++;
+      const qrId = 'qr-print-'+counter;
+      const barcodeId = 'bc-print-'+counter;
+      qrJobs.push({id:qrId, text:p.id});
+      barcodeJobs.push({id:barcodeId, text:p.id});
+      return `<div class="slip-slot">${buildCompactSlipHTML(p, {qrId, barcodeId})}</div>`;
+    }).join('');
+    return `<div class="a4-page">${slots}</div>`;
+  }).join('');
+
+  const qrInitScript = qrJobs.map(j=>
+    `try{ new QRCode(document.getElementById('${j.id}'), {text:'${j.text}', width:52, height:52, colorDark:'#111827', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.M}); }catch(e){document.getElementById('${j.id}').innerHTML='<div style="font-size:7px">${j.text}</div>';}`
+  ).join('\n');
+
+  const barcodeInitScript = barcodeJobs.map(j=>
+    `try{ JsBarcode('#${j.id}', '${j.text}', {format:'CODE128', displayValue:false, height:22, width:1.1, margin:0}); }catch(e){}`
+  ).join('\n');
+
+  return `<!DOCTYPE html><html><head><title>TRIX Slips (${parcels.length})</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/JsBarcode/3.11.5/JsBarcode.all.min.js"><\/script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{font-family:Arial,Helvetica,sans-serif;color:#111;background:#f3f4f6}
+    .toolbar{padding:14px 16px;background:#1a56db;color:white;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+    .toolbar .tt{font-weight:700;font-size:14px}
+    .print-btn{padding:8px 18px;background:white;color:#1a56db;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600}
+
+    .a4-page{
+      width:190mm;
+      height:276mm;
+      overflow:hidden;
+      margin:10mm auto;
+      background:white;
+      box-shadow:0 0 6px rgba(0,0,0,.15);
+      display:flex;
+      flex-direction:column;
+    }
+    .slip-slot{
+      height:92mm;
+      flex:0 0 92mm;
+      border-bottom:1.5px dashed #b0b6c0;
+      padding:2.5mm 3mm;
+      overflow:hidden;
+      position:relative;
+    }
+    .slip-slot:last-child{border-bottom:none}
+    .slip-slot-empty{background:repeating-linear-gradient(135deg,#fafafa,#fafafa 10px,#f3f4f6 10px,#f3f4f6 20px)}
+
+    /* ===== WAYBILL LABEL DESIGN ===== */
+    .wb{height:100%;border:1.3px solid #111;display:flex;flex-direction:column;font-size:7px;line-height:1.25}
+
+    .wb-row{display:flex;width:100%}
+    .wb-top{border-bottom:1.3px solid #111}
+    .wb-col{border-right:1.3px solid #111;padding:1.5mm 2mm}
+    .wb-col:last-child{border-right:none}
+
+    .wb-logo-col{flex:0 0 32%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.8mm}
+    .wb-logo{display:flex;align-items:center;gap:2px}
+    .wb-logo-text{font-weight:800;font-size:11px;color:#0e9f6e;letter-spacing:.5px}
+    .wb-barcode{width:100%;text-align:center}
+    .wb-barcode svg{max-width:100%;height:22px}
+    .wb-tid{font-family:monospace;font-size:8px;font-weight:700;letter-spacing:.5px}
+    .wb-printedby{font-size:6px;color:#444}
+
+    .wb-qr-col{flex:0 0 26%;display:flex;align-items:center;justify-content:center}
+    .wb-qr{width:52px;height:52px}
+
+    .wb-meta-col{flex:1;padding:0}
+    .wb-meta-table{width:100%;border-collapse:collapse;height:100%}
+    .wb-meta-table td{border:0.8px solid #ccc;padding:1mm 1.5mm;font-size:6.6px;vertical-align:middle}
+    .wb-mlbl{font-weight:700;color:#333;background:#f4f4f4;width:20%}
+    .wb-mval{color:#111}
+
+    .wb-half-headers{}
+    .wb-bar{flex:1;background:#111;color:#fff;text-align:center;font-weight:700;font-size:7.5px;padding:1mm 0;text-transform:none}
+    .wb-half{width:50%}
+
+    .wb-half-values{border-bottom:1.3px solid #111}
+    .wb-bigval{flex:1;text-align:center;font-weight:800;font-size:12px;padding:1.5mm 0;border-right:1.3px solid #111}
+    .wb-bigval:last-child{border-right:none}
+
+    .wb-table{width:100%;border-collapse:collapse;table-layout:fixed}
+    .wb-table td{border:1px solid #111;padding:1mm 1.5mm;font-size:6.8px;vertical-align:top;word-break:break-word}
+    .wb-lbl{font-weight:700;color:#111;background:#f4f4f4;width:16%}
+    .wb-val{color:#111}
+    .wb-sub{font-weight:700;color:#555;margin-right:2px}
+    .wb-cod{font-weight:800}
+    .wb-words{font-style:italic;font-size:6.6px}
+
+    .wb-urdu{
+      direction:rtl;
+      text-align:center;
+      font-size:6.6px;
+      line-height:1.6;
+      padding:1mm 2mm;
+      border-top:1px solid #111;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      font-family:'Noto Nastaliq Urdu','Jameel Noori Nastaleeq',Tahoma,sans-serif;
+    }
+
+    @media print{
+      body{background:white}
+      .toolbar{display:none}
+      .slip-slot-empty{background:none !important}
+      .a4-page{margin:0;box-shadow:none;page-break-after:always}
+      .a4-page:last-child{page-break-after:auto}
+      @page{size:A4;margin:10mm}
+    }
+  </style></head><body>
+  <div class="toolbar">
+    <div class="tt">TRIX Slips — ${parcels.length} record${parcels.length!==1?'s':''} (3 per A4 page)</div>
+    <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+  </div>
+  ${pagesHtml}
+  <script>
+    ${qrInitScript}
+    ${barcodeInitScript}
+  <\/script>
+  </body></html>`;
+}
+
+async function printSelectedSlips(){
+  const pp=getMyParcels().filter(p=>ordSelectedSet.has(p.id));
+  if(!pp.length){showToast('Pehle kuch orders select karein.','error');return;}
+  const w=window.open('','_blank');
+  if(!w){showToast('Popup blocked! Allow popups and try again.','error');return;}
+  w.document.write(buildSlipsPrintDocument(pp));
+  w.document.close();
+  setTimeout(()=>w.print(),700);
+}
+
+// ══════════════════════════════════════════
+//  Change 4: Update status directly from Admin table row
+// ══════════════════════════════════════════
+async function updateStatusFromTable(pid, selId){
+  const sel=document.getElementById(selId);
+  if(!sel)return;
+  const newStatus=sel.value;
+  const p=allParcels.find(x=>x.id===pid);
+  if(!p)return;
+  const tl=Array.isArray(p.timeline)?[...p.timeline]:[...Object.values(p.timeline||{}).sort((a,b)=>new Date(a.time)-new Date(b.time))];
+  tl.push({status:newStatus,time:new Date().toISOString()});
+  await db.ref('parcels/'+pid).update({status:newStatus,timeline:tl});
+  showToast(`${pid} → ${newStatus}`,'success');
 }
 
 // ══════════════════════════════════════════
@@ -1110,7 +1576,7 @@ function renderAdminTable(){
   wrap.innerHTML=`<table class="wide"><thead><tr>
     <th class="th-check"><input type="checkbox" onchange="toggleAll('adm',this.checked)"></th>
     <th>Tracking ID</th><th>Booked By</th><th>Shipper</th><th>Consignee</th>
-    <th>Weight</th><th>Item Desc</th><th>COD</th><th>Status</th><th>Date</th><th>Action</th>
+    <th>Weight</th><th>Item Desc</th><th>Service</th><th>COD / DC</th><th>Current Status</th><th>Date</th><th>Update Status</th><th>Slip</th>
   </tr></thead><tbody>${admTableData.map(p=>`<tr class="${selectedSets.adm.has(p.id)?'row-selected':''}" id="admr-${p.id}">
     <td class="td-check"><input type="checkbox" ${selectedSets.adm.has(p.id)?'checked':''} onchange="onChk('adm','${p.id}',this)"></td>
     <td class="td-id" onclick="renderAdminDetail('${p.id}')">${p.id}</td>
@@ -1119,10 +1585,19 @@ function renderAdminTable(){
     <td>${p.rName}<br><span style="font-size:11px;color:var(--muted)">${p.rCity}</span></td>
     <td>${p.weight}kg</td>
     <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${p.itemDesc||'—'}</td>
-    <td>${pkr(p.cod)}</td>
+    <td>${svcType(p)}</td>
+    <td>${pkr(svcAmount(p))}</td>
     <td>${badge(p.status)}</td>
     <td>${fmt(p.createdAt)}</td>
-    <td><button class="btn btn-primary btn-xs" onclick="renderAdminDetail('${p.id}')">Details</button></td>
+    <td style="white-space:nowrap">
+      <div style="display:flex;gap:5px;align-items:center">
+        <select id="adm-ssel-${p.id}" style="padding:4px 7px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;outline:none;cursor:pointer;max-width:160px">
+          ${STATUSES.map(s=>`<option value="${s.key}"${s.key===p.status?' selected':''}>${s.key}</option>`).join('')}
+        </select>
+        <button class="btn btn-primary btn-xs" onclick="updateStatusFromTable('${p.id}','adm-ssel-${p.id}')">Save</button>
+      </div>
+    </td>
+    <td><button class="btn btn-secondary btn-xs" onclick="openSlipById('${p.id}')">🖨️ Slip</button></td>
   </tr>`).join('')}</tbody></table>`;
 }
 function renderAdminDetail(id){
@@ -1202,7 +1677,7 @@ function exportExcel(ns){
     'Consignee City':p.rCity,'Consignee Address':p.rAddr||'',
     'Weight (kg)':p.weight,'Parcel Type':p.type,
     'Item Description':p.itemDesc||'',
-    'COD Amount':p.cod,'Parcel Value':p.value,
+    'Service Type':svcType(p),'COD Amount':svcType(p)==='COD'?svcAmount(p):0,'DC Charged':svcType(p)==='Prepaid'?svcAmount(p):0,'Parcel Value':p.value,
     'Notes':p.notes||'','Status':p.status,'Booked By':p.userName||''
   }));
   try{
@@ -1223,7 +1698,8 @@ function printTable(ns){
     <td>${p.rName}</td><td>${p.rCity}</td>
     <td>${p.weight}kg</td><td>${p.type}</td>
     <td>${p.itemDesc||'—'}</td>
-    <td>${p.cod>0?'PKR '+Number(p.cod).toLocaleString():'—'}</td>
+    <td>${svcType(p)}</td>
+    <td>${svcAmount(p)>0?'PKR '+Number(svcAmount(p)).toLocaleString():'—'}</td>
     <td>${p.value>0?'PKR '+Number(p.value).toLocaleString():'—'}</td>
     <td>${p.status}</td>
   </tr>`).join('');
@@ -1248,7 +1724,7 @@ function printTable(ns){
     <thead><tr>
       <th>Tracking ID</th><th>Date</th><th>Shipper</th><th>From City</th>
       <th>Consignee</th><th>To City</th><th>Weight</th><th>Type</th>
-      <th>Item Desc</th><th>COD</th><th>Value</th><th>Status</th>
+      <th>Item Desc</th><th>Service</th><th>COD / DC</th><th>Value</th><th>Status</th>
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>
@@ -1264,11 +1740,10 @@ function printTable(ns){
 // ══════════════════════════════════════════
 //  SLIP WITH QR
 // ══════════════════════════════════════════
+// Every "Slip" / "Print Slip" button (History, Bookings, Track, Admin) comes here.
+// It prints the compact label directly — it no longer opens the big full-page preview.
 async function openSlipById(parcelId){
-  let p=allParcels.find(x=>x.id===parcelId);
-  if(!p){const snap=await db.ref('parcels/'+parcelId).once('value');if(snap.exists()){p=snap.val();if(p.timeline&&!Array.isArray(p.timeline))p.timeline=Object.values(p.timeline).sort((a,b)=>new Date(a.time)-new Date(b.time));}}
-  if(!p)return;
-  openSlip(p);
+  return printSlip(parcelId);
 }
 function openSlip(p){
   const slip=document.getElementById('slip-section');
@@ -1308,7 +1783,7 @@ function openSlip(p){
           <div class="sf-row"><div class="sf-label">Weight</div><div class="sf-val">${p.weight} kg</div></div>
           <div class="sf-row"><div class="sf-label">Type</div><div class="sf-val">${p.type}</div></div>
           <div class="sf-row"><div class="sf-label">Item Description</div><div class="sf-val">${p.itemDesc||'—'}</div></div>
-          <div class="sf-row"><div class="sf-label">COD Amount</div><div class="sf-val">${pkr(p.cod)}</div></div>
+          <div class="sf-row"><div class="sf-label">${svcType(p)} — ${svcAmtLabel(p)}</div><div class="sf-val">${pkr(svcAmount(p))}</div></div>
           <div class="sf-row"><div class="sf-label">Parcel Value</div><div class="sf-val">${pkr(p.value)}</div></div>
           <div class="sf-row"><div class="sf-label">Status</div><div class="sf-val">${badge(p.status)}</div></div>
           <div class="sf-row"><div class="sf-label">Notes</div><div class="sf-val">${p.notes||'—'}</div></div>
@@ -1329,68 +1804,17 @@ function openSlip(p){
   slip.scrollIntoView({behavior:'smooth',block:'start'});
 }
 async function printSlip(parcelId){
+  // Open the window first (inside the click) so popup blockers don't stop it
+  const w=window.open('','_blank');
+  if(!w){showToast('Popup blocked! Allow popups and try again.','error');return;}
   let p=allParcels.find(x=>x.id===parcelId);
   if(!p){const snap=await db.ref('parcels/'+parcelId).once('value');if(snap.exists())p=snap.val();}
-  if(!p)return;
-  const qrEl=document.getElementById('qr-'+parcelId);
-  let qrImg='';if(qrEl){const img=qrEl.querySelector('img');if(img)qrImg=`<img src="${img.src}" style="width:100px;height:100px">`;}
-  const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html><head><title>TRIX Slip — ${p.id}</title>
-  <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:sans-serif;padding:24px;color:#111;font-size:14px}
-  .head{background:#1a56db;color:white;padding:16px 20px;border-radius:10px 10px 0 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-  .nm{font-size:22px;font-weight:800}.tg{font-size:11px;opacity:.75}
-  .body{border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px}
-  .qw{text-align:center;padding:14px;border:1.5px dashed #e5e7eb;border-radius:8px;margin-bottom:16px}
-  .ql{font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-  .qb{display:inline-block;padding:6px;border:1px solid #e5e7eb;border-radius:6px;margin:4px 0}
-  .tid{font-size:18px;font-weight:800;letter-spacing:3px;margin-top:6px;font-family:monospace}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-  .sec{border:1.5px solid #e5e7eb;border-radius:8px;padding:12px}
-  .stitle{font-size:10px;font-weight:700;color:#1a56db;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
-  .row{margin-bottom:5px}.lbl{font-size:10px;color:#6b7280}.val{font-size:13px;font-weight:600}
-  .dg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
-  .ft{border-top:1px solid #e5e7eb;padding-top:12px;text-align:center;font-size:11px;color:#9ca3af;margin-top:14px}
-  @media print{button{display:none}@page{margin:12mm}}</style></head><body>
-  <div class="head">
-    <div><div class="nm">TRIX</div><div class="tg">Courier &amp; Logistics</div></div>
-    <div style="text-align:right;font-size:12px;opacity:.8">Booking: ${fmt(p.createdAt)}<br>Printed: ${fmt(new Date())}</div>
-  </div>
-  <div class="body">
-    <div class="qw">
-      <div class="ql">Scan QR to Track</div>
-      <div class="qb">${qrImg||`<div style="width:100px;height:100px;display:flex;align-items:center;justify-content:center;background:#f3f4f6;font-size:9px;color:#999">${p.id}</div>`}</div>
-      <div class="tid">${p.id}</div>
-    </div>
-    <div class="grid">
-      <div class="sec"><div class="stitle">Shipper (From)</div>
-        <div class="row"><div class="lbl">Name</div><div class="val">${p.sName}</div></div>
-        <div class="row"><div class="lbl">Phone</div><div class="val">${p.sPhone}</div></div>
-        <div class="row"><div class="lbl">City</div><div class="val">${p.sCity}</div></div>
-        <div class="row"><div class="lbl">Address</div><div class="val">${p.sAddr||'—'}</div></div>
-      </div>
-      <div class="sec"><div class="stitle">Consignee (To)</div>
-        <div class="row"><div class="lbl">Name</div><div class="val">${p.rName}</div></div>
-        <div class="row"><div class="lbl">Phone</div><div class="val">${p.rPhone}</div></div>
-        <div class="row"><div class="lbl">City</div><div class="val">${p.rCity}</div></div>
-        <div class="row"><div class="lbl">Address</div><div class="val">${p.rAddr||'—'}</div></div>
-      </div>
-    </div>
-    <div class="sec" style="margin-bottom:14px"><div class="stitle">Parcel Details</div>
-      <div class="dg">
-        <div class="row"><div class="lbl">Weight</div><div class="val">${p.weight} kg</div></div>
-        <div class="row"><div class="lbl">Type</div><div class="val">${p.type}</div></div>
-        <div class="row"><div class="lbl">Item Description</div><div class="val">${p.itemDesc||'—'}</div></div>
-        <div class="row"><div class="lbl">COD Amount</div><div class="val">${pkr(p.cod)}</div></div>
-        <div class="row"><div class="lbl">Parcel Value</div><div class="val">${pkr(p.value)}</div></div>
-        <div class="row"><div class="lbl">Status</div><div class="val">${p.status}</div></div>
-        <div class="row"><div class="lbl">Notes</div><div class="val">${p.notes||'—'}</div></div>
-      </div>
-    </div>
-    <div class="ft">This slip is proof of booking with TRIX Courier &amp; Logistics. Retain until delivery confirmed.<br><strong>TRIX</strong> — Fast. Reliable. Trusted. | trix.com.pk</div>
-  </div>
-  <br><button onclick="window.print()" style="padding:10px 20px;background:#1a56db;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px">🖨️ Print Slip</button>
-  </body></html>`);
-  w.document.close();setTimeout(()=>w.print(),500);
+  if(!p){w.close();return;}
+  // Uses the same unified 3-per-A4-page layout.
+  // Single slip prints at the TOP of the page; rest stays blank.
+  w.document.write(buildSlipsPrintDocument([p]));
+  w.document.close();
+  setTimeout(()=>w.print(),700);
 }
 
 // ══════════════════════════════════════════
@@ -1399,6 +1823,7 @@ async function printSlip(parcelId){
 document.addEventListener('DOMContentLoaded', async ()=>{
   populateCities();
   populateStatusFilters();
+  applyLogo();
   setLoading('Connecting to Firebase…');
   // Auto-create admin account if it doesn't exist yet
   await ensureAdminExists();
