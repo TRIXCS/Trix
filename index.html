@@ -1318,10 +1318,10 @@ function buildCompactSlipHTML(p, ids){
       <div class="wb-col wb-logo-col">
         ${logoHtml}
         <div class="wb-barcode"><svg id="${ids.barcodeId}"></svg></div>
-        <div class="wb-tid">${p.id}</div>
       </div>
       <div class="wb-col wb-qr-col">
         <div class="wb-qr" id="${ids.qrId}"></div>
+        <div class="wb-tid">${p.id}</div>
       </div>
       <div class="wb-col wb-meta-col">
         <table class="wb-meta-table">
@@ -1433,15 +1433,15 @@ function buildSlipsPrintDocument(parcels){
     .wb-col{border-right:1.3px solid #111;padding:1.5mm 2mm}
     .wb-col:last-child{border-right:none}
 
-    .wb-logo-col{flex:0 0 32%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.8mm}
+    .wb-logo-col{flex:0 0 32%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2mm;text-align:center}
     .wb-logo{display:flex;align-items:center;gap:2px}
     .wb-logo-text{font-weight:800;font-size:13px;color:#0e9f6e;letter-spacing:.5px}
-    .wb-logo-img{max-height:11mm;max-width:90%;object-fit:contain}
+    .wb-logo-img{max-height:12mm;max-width:85%;object-fit:contain;display:block;margin:0 auto}
     .wb-barcode{width:100%;text-align:center}
     .wb-barcode svg{max-width:100%;height:28px}
     .wb-tid{font-family:monospace;font-size:10px;font-weight:700;letter-spacing:.5px}
 
-    .wb-qr-col{flex:0 0 26%;display:flex;align-items:center;justify-content:center}
+    .wb-qr-col{flex:0 0 26%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2mm}
     .wb-qr{width:62px;height:62px}
 
     .wb-meta-col{flex:1;padding:0}
