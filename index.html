@@ -1334,18 +1334,25 @@ function buildCompactSlipHTML(p, ids){
          <span class="wb-logo-text">TRIX</span>
        </div>`;
 
-  // COD  -> Notes + Payment Mode, then Collection Amount
-  // Prepaid -> Notes only, then a single "DC Charged" line
-  const notesRow = isCOD
-    ? `<tr>
+  // Weight sits directly under "Sub Segment" (right column), with Notes on the left.
+  //   COD     -> Collection Amount + Payment Mode, then the amount in words
+  //   Prepaid -> a single "DC Charged" line (no Payment Mode / Collection Amount)
+  const w = parseFloat(p.weight);
+  const weightText = isNaN(w) ? '—' : `${w} kg`;
+  const notesRow = `<tr>
          <td class="wb-lbl">Notes</td><td class="wb-val">${p.notes||'None'}</td>
+         <td class="wb-lbl">Weight</td><td class="wb-val">${weightText}</td>
+       </tr>`;
+  const amountRow = isCOD
+    ? `<tr>
+         <td class="wb-lbl">Collection Amount</td><td class="wb-val wb-cod">${amountText}</td>
          <td class="wb-lbl">Payment Mode</td><td class="wb-val">COD</td>
+       </tr>
+       <tr>
+         <td class="wb-val wb-words" colspan="4">${amountWords}</td>
        </tr>`
     : `<tr>
-         <td class="wb-lbl">Notes</td><td class="wb-val" colspan="3">${p.notes||'None'}</td>
-       </tr>`;
-  const amountRow = `<tr>
-         <td class="wb-lbl">${isCOD?'Collection Amount':'DC Charged'}</td>
+         <td class="wb-lbl">DC Charged</td>
          <td class="wb-val wb-cod">${amountText}</td>
          <td class="wb-val wb-words" colspan="2">${amountWords}</td>
        </tr>`;
@@ -1493,7 +1500,7 @@ function buildSlipsPrintDocument(parcels){
     .wb-half{width:50%}
 
     .wb-table{width:100%;border-collapse:collapse;table-layout:fixed}
-    .wb-table td{border:1px solid #111;padding:1.4mm 1.8mm;font-size:8.4px;vertical-align:top;word-break:break-word}
+    .wb-table td{border:1px solid #111;padding:1mm 1.8mm;font-size:8.4px;vertical-align:top;word-break:break-word}
     .wb-lbl{font-weight:700;color:#111;background:#f4f4f4;width:16%}
     .wb-val{color:#111}
     .wb-sub{font-weight:700;color:#555;margin-right:2px}
