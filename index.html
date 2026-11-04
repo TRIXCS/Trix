@@ -412,7 +412,7 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
     <div class="form-grid">
       <div class="form-group"><label>Weight (kg) *</label><input type="number" id="weight" placeholder="e.g. 2.5" min="0.1" step="0.1"></div>
       <div class="form-group"><label>Parcel Type *</label>
-        <select id="pType"><option value="">Select Type</option><option>Documents</option><option>Electronics</option><option>Apparel</option><option>Food</option><option>Medicine</option><option>Cosmetics</option><option>Fragile</option><option>Other</option></select>
+        <select id="pType"><option value="">Select Type</option><option>Documents</option><option>Electronics</option><option>Clothing</option><option>Food</option><option>Medicine</option><option>Cosmetics</option><option>Fragile</option><option>Other</option></select>
       </div>
       <div class="form-group full"><label>Item Description *</label><input type="text" id="itemDesc" placeholder="e.g. Mobile Accessories, Clothes, Documents, Shoes…"></div>
       <div class="form-group"><label>Service Type *</label>
@@ -602,7 +602,7 @@ function applyLogo(){
     authMark.innerHTML=`<img src="${LOGO_URL}" alt="TRIX" style="height:62px;width:auto;object-fit:contain;display:block">`;
   }
 }
-const CITIES = ['Karachi','Lahore','Islamabad','Rawalpindi','Faisalabad','Multan','Peshawar','Quetta','Hyderabad','Sialkot','Gujranwala','Sukkur','Bahawalpur','Abbottabad','Sargodha','Dera Ghazi Khan','Dera Ismail Khan','Mardan','Larkana','Sheikhupura','Jhang','Rahim Yar Khan','Gujrat','Kasur','Mingora','Nawabshah','Muzaffarabad'];
+const CITIES = ['Karachi','Lahore','Islamabad','Rawalpindi','Faisalabad','Multan','Peshawar','Quetta','Hyderabad','Sialkot','Gujranwala','Sukkur','Bahawalpur','Abbottabad','Sargodha','Dera Ghazi Khan','Mardan','Larkana','Sheikhupura','Jhang','Rahim Yar Khan','Gujrat','Kasur','Mingora','Nawabshah'];
 const STATUSES = [
   {key:'Booked',cls:'b-booked'},{key:'Picked',cls:'b-picked'},{key:'In-Transit',cls:'b-transit'},
   {key:'Arrived at Destination',cls:'b-arrived'},{key:'Out For Delivery',cls:'b-outdelivery'},
@@ -631,6 +631,18 @@ let usersRef   = null;
 const v    = id => (document.getElementById(id)||{}).value?.trim()||'';
 const fmt  = d  => new Date(d).toLocaleDateString('en-PK',{day:'2-digit',month:'short',year:'numeric'});
 const fmtDT= d  => new Date(d).toLocaleString('en-PK',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+// Booking date helpers
+// Stored in Firebase as plain "YYYY-MM-DD" (local date) in the field `bookingDate`.
+const localDateStr = d => { const x=new Date(d); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); };
+function bookingDateOf(p){
+  // Prefer bookingDate; fall back to createdAt, then the first timeline entry (old parcels)
+  const first = Object.values(p.timeline||{})[0];
+  const src = p.bookingDate ? p.bookingDate+'T00:00:00' : (p.createdAt || (first&&first.time));
+  const d = new Date(src);
+  return isNaN(d) ? null : d;
+}
+const fmtBookingDate = p => { const d=bookingDateOf(p); return d ? fmt(d) : '—'; };
 const pkr  = n  => n>0?'PKR '+Number(n).toLocaleString():'—';
 const sCls = k  => (STATUSES.find(x=>x.key===k)||{cls:'b-booked'}).cls;
 const badge= s  => `<span class="badge ${sCls(s)}"><span class="badge-dot"></span>${s}</span>`;
@@ -707,6 +719,19 @@ auth.onAuthStateChanged(async fbUser=>{
 //  Filtering by user is done in JS so we
 //  don't depend on Firebase index rules.
 // ══════════════════════════════════════════
+// Older bookings were saved without a `bookingDate` field. When an admin is logged in,
+// add it (only that one new field, derived from the parcel's own createdAt).
+const _bdDone = new Set();
+function backfillBookingDates(){
+  allParcels.forEach(p=>{
+    if(p.bookingDate || _bdDone.has(p.id)) return;
+    const d = bookingDateOf(p);
+    if(!d) return;
+    _bdDone.add(p.id);
+    db.ref('parcels/'+p.id+'/bookingDate').set(localDateStr(d)).catch(()=>{ _bdDone.delete(p.id); });
+  });
+}
+
 function attachParcelsListener(){
   if(parcelsRef){parcelsRef.off();}
   // Always listen to full /parcels node
@@ -723,6 +748,7 @@ function attachParcelsListener(){
     });
     // Sort newest first
     allParcels.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+    if(isAdmin()) backfillBookingDates();
     // Refresh active page
     const ap=document.querySelector('.page.active')?.id;
     if(ap==='page-home')     updateHomeStats();
@@ -968,7 +994,7 @@ async function bookParcel(){
       dcCharged:stSel==='Prepaid'?(parseFloat(amtEl.value)||0):0,
       value:parseFloat(document.getElementById('parcelValue').value)||0,
       notes:v('notes')||'None',
-      status:'Booked',timeline:[{status:'Booked',time:now}],createdAt:now
+      status:'Booked',timeline:[{status:'Booked',time:now}],createdAt:now,bookingDate:localDateStr(now)
     };
     await db.ref('parcels/'+tid).set(parcel);
     clearBookForm();
@@ -1281,7 +1307,6 @@ function numberToWordsPKR(num){
 
 // Builds the compact HTML for ONE waybill-style slip slot
 function buildCompactSlipHTML(p, ids){
-  const now = new Date();
   const st = svcType(p);                       // 'COD' or 'Prepaid'
   const amt = svcAmount(p);                    // COD amount, or DC charged for Prepaid
   const isCOD = st==='COD';
@@ -1325,7 +1350,7 @@ function buildCompactSlipHTML(p, ids){
       </div>
       <div class="wb-col wb-meta-col">
         <table class="wb-meta-table">
-          <tr><td class="wb-mlbl">Datetime</td><td class="wb-mval" colspan="3">${fmtDT(now)}</td></tr>
+          <tr><td class="wb-mlbl">Booking Date</td><td class="wb-mval" colspan="3">${fmtBookingDate(p)}</td></tr>
           <tr><td class="wb-mlbl">Origin</td><td class="wb-mval">${p.sCity||'—'}</td><td class="wb-mlbl">Destination</td><td class="wb-mval">${p.rCity||'—'}</td></tr>
         </table>
       </div>
