@@ -635,12 +635,21 @@ const fmtDT= d  => new Date(d).toLocaleString('en-PK',{day:'2-digit',month:'shor
 // Booking date helpers
 // Stored in Firebase as plain "YYYY-MM-DD" (local date) in the field `bookingDate`.
 const localDateStr = d => { const x=new Date(d); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); };
-function bookingDateOf(p){
-  // Prefer bookingDate; fall back to createdAt, then the first timeline entry (old parcels)
-  const first = Object.values(p.timeline||{})[0];
-  const src = p.bookingDate ? p.bookingDate+'T00:00:00' : (p.createdAt || (first&&first.time));
-  const d = new Date(src);
+function _mkDate(y,m,d){ const x=new Date(y,m-1,d); return (x.getFullYear()===y && x.getMonth()===m-1 && x.getDate()===d) ? x : null; }
+function parseDateLoose(v){
+  if(!v) return null;
+  const t=String(v).trim();
+  let m=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);              // 2026-11-04
+  if(m) return _mkDate(+m[1],+m[2],+m[3]);
+  m=t.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);     // 04/11/2026, 04-11-2026, 04.11.2026 (day first)
+  if(m) return _mkDate(+m[3],+m[2],+m[1]);
+  const d=new Date(t);                                           // "04 Nov 2026", ISO timestamps, ...
   return isNaN(d) ? null : d;
+}
+function bookingDateOf(p){
+  // The `bookingDate` field in Firebase wins. Falls back to createdAt / first timeline entry (old parcels).
+  const first = Object.values(p.timeline||{})[0];
+  return parseDateLoose(p.bookingDate) || parseDateLoose(p.createdAt) || parseDateLoose(first&&first.time);
 }
 const fmtBookingDate = p => { const d=bookingDateOf(p); return d ? fmt(d) : '—'; };
 const pkr  = n  => n>0?'PKR '+Number(n).toLocaleString():'—';
@@ -747,7 +756,10 @@ function attachParcelsListener(){
       allParcels.push(d);
     });
     // Sort newest first
-    allParcels.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+    allParcels.sort((a,b)=>{
+      const da=bookingDateOf(a), dbk=bookingDateOf(b);
+      return ((dbk?+dbk:0)-(da?+da:0)) || (new Date(b.createdAt)-new Date(a.createdAt)) || 0;
+    });
     if(isAdmin()) backfillBookingDates();
     // Refresh active page
     const ap=document.querySelector('.page.active')?.id;
@@ -755,6 +767,7 @@ function attachParcelsListener(){
     if(ap==='page-bookings') renderBookingsTable();
     if(ap==='page-history')  renderHistory();
     if(ap==='page-admin')    renderAdminPage();
+    if(ap==='page-track' && v('track-input')) trackParcel();
   });
 }
 
@@ -1065,7 +1078,7 @@ function renderParcelCard(p,canEdit=false){
       </div>
       <div style="text-align:right">
         <div style="font-size:11px;opacity:.7;margin-bottom:3px">Booked</div>
-        <div style="font-size:13px">${fmt(p.createdAt)}</div>
+        <div style="font-size:13px">${fmtBookingDate(p)}</div>
         ${selHtml}
       </div>
     </div>
@@ -1123,7 +1136,7 @@ function getFilteredBookings(){
     if(cn&&!p.rName?.toLowerCase().includes(cn))return false;
     if(cy&&!p.sCity?.toLowerCase().includes(cy)&&!p.rCity?.toLowerCase().includes(cy))return false;
     if(st&&p.status!==st)return false;
-    if(dt&&!p.createdAt?.startsWith(dt))return false;
+    if(dt){ const bd=bookingDateOf(p); if(!bd||localDateStr(bd)!==dt) return false; }
     return true;
   });
 }
@@ -1149,7 +1162,7 @@ function renderBookingsTable(){
   </tr></thead><tbody>${bkTableData.map(p=>`<tr class="${sel.has(p.id)?'row-selected':''}" id="bkr-${p.id}">
     <td class="td-check"><input type="checkbox" ${sel.has(p.id)?'checked':''} onchange="onChk('bk','${p.id}',this)"></td>
     <td class="td-id" onclick="openTrackById('${p.id}')">${p.id}</td>
-    <td>${fmt(p.createdAt)}</td>
+    <td>${fmtBookingDate(p)}</td>
     <td>${p.sName}</td><td>${p.sCity}</td>
     <td>${p.rName}</td><td>${p.rCity}</td>
     <td>${p.weight}kg</td><td>${p.type}</td>
@@ -1229,7 +1242,7 @@ function renderHistory(){
       <td class="td-check"><input type="checkbox" ${ordSelectedSet.has(p.id)?'checked':''} onchange="onOrdChk('${p.id}',this)"></td>
       <td style="color:var(--muted);font-size:12px">${i+1}</td>
       <td class="td-id" onclick="renderHistoryDetail('${p.id}')">${p.id}</td>
-      <td>${fmt(p.createdAt)}</td>
+      <td>${fmtBookingDate(p)}</td>
       <td style="font-weight:500">${p.sName}</td>
       <td>${p.sCity}</td>
       <td style="font-weight:500">${p.rName}</td>
@@ -1576,7 +1589,7 @@ function renderAdminTable(){
     <td>${svcType(p)}</td>
     <td>${pkr(svcAmount(p))}</td>
     <td>${badge(p.status)}</td>
-    <td>${fmt(p.createdAt)}</td>
+    <td>${fmtBookingDate(p)}</td>
     <td style="white-space:nowrap">
       <div style="display:flex;gap:5px;align-items:center">
         <select id="adm-ssel-${p.id}" style="padding:4px 7px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;outline:none;cursor:pointer;max-width:160px">
@@ -1629,7 +1642,7 @@ function getExportData(ns){
       if(cn&&!p.rName?.toLowerCase().includes(cn))return false;
       if(cy&&!p.sCity?.toLowerCase().includes(cy)&&!p.rCity?.toLowerCase().includes(cy))return false;
       if(st&&p.status!==st)return false;
-      if(dt&&!p.createdAt?.startsWith(dt))return false;
+      if(dt){ const bd=bookingDateOf(p); if(!bd||localDateStr(bd)!==dt) return false; }
       return true;
     });
     // Also sync bkTableData so checkboxes remain consistent
@@ -1658,7 +1671,7 @@ function exportExcel(ns){
   const data=getExportData(ns);
   if(!data.length){showToast('No data to export.','error');return;}
   const rows=data.map(p=>({
-    'Tracking ID':p.id,'Date':fmt(p.createdAt),
+    'Tracking ID':p.id,'Date':fmtBookingDate(p),
     'Shipper Name':p.sName,'Shipper Phone':p.sPhone,
     'Shipper City':p.sCity,'Shipper Address':p.sAddr||'',
     'Consignee Name':p.rName,'Consignee Phone':p.rPhone,
@@ -1681,7 +1694,7 @@ function printTable(ns){
   const data=getExportData(ns);
   if(!data.length){showToast('No data to print.','error');return;}
   const rows=data.map(p=>`<tr>
-    <td>${p.id}</td><td>${fmt(p.createdAt)}</td>
+    <td>${p.id}</td><td>${fmtBookingDate(p)}</td>
     <td>${p.sName}</td><td>${p.sCity}</td>
     <td>${p.rName}</td><td>${p.rCity}</td>
     <td>${p.weight}kg</td><td>${p.type}</td>
@@ -1741,7 +1754,7 @@ function openSlip(p){
         <div class="sb-box"><svg viewBox="0 0 28 28" fill="none"><path d="M7 10h8l3 5H7V10z" fill="white" opacity=".9"/><path d="M15 10l3 5h3l-2-5h-4z" fill="white" opacity=".6"/><circle cx="10" cy="18" r="2" fill="white"/><circle cx="18" cy="18" r="2" fill="white"/></svg></div>
         <div><div class="sb-name">TRIX</div><div class="sb-tag">Courier &amp; Logistics</div></div>
       </div>
-      <div style="text-align:right;font-size:12px;opacity:.8">Booking: ${fmt(p.createdAt)}<br>Printed: ${fmt(new Date())}</div>
+      <div style="text-align:right;font-size:12px;opacity:.8">Booking: ${fmtBookingDate(p)}<br>Printed: ${fmt(new Date())}</div>
     </div>
     <div class="slip-body">
       <div class="slip-qr-wrap">
