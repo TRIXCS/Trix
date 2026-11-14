@@ -694,17 +694,14 @@ function setBtnLoading(id,on,lbl=''){
 // Sends an admin to the backend page - but first checks the file exists, so a missing
 // file shows a clear message instead of a "404 Not Found" page.
 async function goToBackend(){
+  // returns true when the browser is being sent to the backend page.
+  // If the backend page does not exist yet, the admin simply continues on this (user) site.
   try{
     const r=await fetch(BACKEND_PAGE,{method:'HEAD',cache:'no-store'});
-    if(r.status===404){
-      await auth.signOut();
-      setLoading(false);
-      showErr('login-err','Admin page ('+BACKEND_PAGE+') was not found next to this page. Upload it to the same folder, then login again.');
-      setBtnLoading('login-btn',false,'Login to TRIX');
-      return;
-    }
+    if(r.status===404) return false;
   }catch(e){ /* opened as a local file or offline - just try */ }
   location.replace(BACKEND_PAGE);
+  return true;
 }
 
 // ══════════════════════════════════════════
@@ -865,7 +862,7 @@ async function handleAuthChange(fbUser){
       };
     }
     // Admins work in the backend page - the customer site is for customers
-    if(isAdmin() && !PREVIEW){ goToBackend(); return; }
+    if(isAdmin() && !PREVIEW){ if(await goToBackend()) return; }
     setLoading(false);
     document.getElementById('auth-user').classList.remove('active');
     document.getElementById('app').classList.add('active');
