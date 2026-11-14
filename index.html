@@ -699,7 +699,7 @@ async function goToBackend(){
     if(r.status===404){
       await auth.signOut();
       setLoading(false);
-      showErr('login-err','Login could not be completed. Please contact support.');
+      showErr('login-err','Admin page ('+BACKEND_PAGE+') was not found next to this page. Upload it to the same folder, then login again.');
       setBtnLoading('login-btn',false,'Login to TRIX');
       return;
     }
@@ -847,7 +847,7 @@ function populateStatusFilters(){
 // ══════════════════════════════════════════
 //  FIREBASE AUTH STATE
 // ══════════════════════════════════════════
-auth.onAuthStateChanged(async fbUser=>{
+async function handleAuthChange(fbUser){
   if(fbUser){
     currentUser=fbUser;
     // Load profile from DB — role (admin/user) is stored there
@@ -883,6 +883,18 @@ auth.onAuthStateChanged(async fbUser=>{
     document.getElementById('auth-user').classList.add('active');
     setLoading(false);
     // login button must be usable again after logout / failed login
+    setBtnLoading('login-btn',false,'Login to TRIX');
+  }
+}
+auth.onAuthStateChanged(async fbUser=>{
+  try{ await handleAuthChange(fbUser); }
+  catch(e){
+    console.error('Login error:',e);
+    try{ await auth.signOut(); }catch(_){}
+    document.getElementById('app').classList.remove('active');
+    document.getElementById('auth-user').classList.add('active');
+    setLoading(false);
+    showErr('login-err','Login failed: '+((e&&(e.code||e.message))||'unknown error'));
     setBtnLoading('login-btn',false,'Login to TRIX');
   }
 });
@@ -950,6 +962,10 @@ async function doLogin(){
   setBtnLoading('login-btn',true,'Login to TRIX');
   try{
     await auth.signInWithEmailAndPassword(email.trim(),pass);
+    setTimeout(()=>{ const a=document.getElementById('auth-user');
+      if(a && a.classList.contains('active') && !document.getElementById('login-err').textContent){
+        showErr('login-err','Signed in, but the site could not open. Check your internet and refresh.');
+        setBtnLoading('login-btn',false,'Login to TRIX'); } },9000);
     // onAuthStateChanged will handle the rest — load profile, set role, show dashboard
   }catch(e){
     showErr('login-err',fbErr(e));
@@ -998,7 +1014,7 @@ function fbErr(e){
     'auth/network-request-failed':'Network error. Please check your internet connection.',
     'auth/invalid-credential':'Incorrect email or password.',
   };
-  return m[e.code]||e.message||'Something went wrong.';
+  return (m[e.code]||e.message||'Something went wrong.')+(e.code?' ['+e.code+']':'');
 }
 
 // ══════════════════════════════════════════
