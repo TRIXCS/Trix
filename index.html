@@ -32,7 +32,8 @@ h1,h2,h3,h4{font-family:'Sora',sans-serif}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:#f1f1f1}::-webkit-scrollbar-thumb{background:#c1c9d8;border-radius:4px}
 
 /* LOADING */
-#loading-overlay{position:fixed;top:0;right:0;bottom:0;left:0;background:linear-gradient(135deg,var(--blue-xdark),var(--blue));z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:white}
+#loading-overlay{position:fixed;top:0;right:0;bottom:0;left:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--text)}
+#loading-overlay .spinner{border-color:var(--blue-light);border-top-color:var(--blue)}
 #loading-overlay.hidden{display:none}
 .spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,.25);border-top-color:white;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -335,9 +336,7 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
 <body>
 
 <div id="loading-overlay">
-  <div class="loading-brand">TRIX</div>
   <div class="spinner"></div>
-  <div class="loading-sub" id="loading-msg">Connecting to Firebase…</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -852,8 +851,9 @@ auth.onAuthStateChanged(async fbUser=>{
   if(fbUser){
     currentUser=fbUser;
     // Load profile from DB — role (admin/user) is stored there
-    const snap=await db.ref('users/'+fbUser.uid).once('value');
-    if(snap.exists()){
+    let snap=null;
+    try{ snap=await db.ref('users/'+fbUser.uid).once('value'); }catch(e){ console.warn('Profile read failed:',e&&e.message); }
+    if(snap && snap.exists()){
       userProfile=snap.val();
     } else {
       // Fallback: if no DB profile but email matches admin — treat as admin
@@ -882,6 +882,8 @@ auth.onAuthStateChanged(async fbUser=>{
     document.getElementById('app').classList.remove('active');
     document.getElementById('auth-user').classList.add('active');
     setLoading(false);
+    // login button must be usable again after logout / failed login
+    setBtnLoading('login-btn',false,'Login to TRIX');
   }
 });
 
@@ -1903,7 +1905,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
   populateParcelTypes();
   populateStatusFilters();
   applyLogo();
-  setLoading('Connecting to Firebase…');
+  setLoading('');
+  setTimeout(()=>setLoading(false),8000);   // never leave the page stuck on the loading screen
   attachSettingsListener();   // brand, menu, booking options... all come from the backend settings
   // onAuthStateChanged takes it from here
 });
