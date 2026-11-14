@@ -33,7 +33,7 @@ h1,h2,h3,h4{font-family:'Sora',sans-serif}
 
 /* LOADING */
 #loading-overlay{position:fixed;top:0;right:0;bottom:0;left:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--text)}
-#loading-overlay .spinner{border-color:var(--blue-light);border-top-color:var(--blue)}
+#loading-overlay .spinner{border-color:#e5e7eb;border-top-color:#6b7280}
 #loading-overlay.hidden{display:none}
 .spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,.25);border-top-color:white;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -305,7 +305,6 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
 .site-banner.success{background:var(--green-light);color:#065f46;border-color:#a7f3d0}
 .site-banner.warning{background:var(--amber-light);color:#92400e;border-color:#fcd9a0}
 .site-banner.danger{background:var(--red-light);color:#9b1c1c;border-color:#fca5a5}
-#login-banner{border-radius:var(--radius-sm);margin-bottom:16px;border-width:1px}
 .maint-screen{display:none;position:fixed;top:0;right:0;bottom:0;left:0;z-index:3000;background:linear-gradient(135deg,var(--blue-xdark),var(--blue));align-items:center;justify-content:center;padding:24px;text-align:center;color:#fff}
 .maint-box{max-width:460px}
 .maint-box h2{font-size:26px;margin:16px 0 10px}
@@ -360,7 +359,6 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
       <h2 id="brand-name">TRIX Courier Services</h2>
       <p id="brand-tagline">Fast &amp; Reliable Delivery</p>
     </div>
-    <div class="site-banner info" id="login-banner" style="display:none"></div>
 
     <!-- LOGIN FORM -->
     <div class="auth-form active" id="form-login">
@@ -782,7 +780,7 @@ function applySettings(){
   setText('brand-name',s.brand.name); setText('brand-tagline',s.brand.tagline);
   applyThemeColor(s.brand.color);
   LOGO_URL=s.brand.logo||DEFAULT_LOGO; applyLogo();
-  renderBanner('app-banner'); renderBanner('login-banner');
+  renderBanner('app-banner');
   // menu: pages switched off in the backend disappear from the drawer
   MENU_PAGES.forEach(k=>{ const el=document.getElementById('nl-'+k); if(el) el.style.display=(s.menu[k]===false)?'none':''; });
   const cur=(document.querySelector('.page.active')||{}).id;
