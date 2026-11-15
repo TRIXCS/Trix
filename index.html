@@ -32,8 +32,7 @@ h1,h2,h3,h4{font-family:'Sora',sans-serif}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:#f1f1f1}::-webkit-scrollbar-thumb{background:#c1c9d8;border-radius:4px}
 
 /* LOADING */
-#loading-overlay{position:fixed;top:0;right:0;bottom:0;left:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--text)}
-#loading-overlay .spinner{border-color:#e5e7eb;border-top-color:#6b7280}
+#loading-overlay{position:fixed;top:0;right:0;bottom:0;left:0;background:linear-gradient(135deg,var(--blue-xdark),var(--blue));z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:white}
 #loading-overlay.hidden{display:none}
 .spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,.25);border-top-color:white;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -121,6 +120,9 @@ body.drawer-open .menu-btn{background:var(--blue-light);border-color:var(--blue-
 .dash-info{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px 24px;margin-top:20px;padding-top:20px;border-top:1px solid var(--border)}
 .dash-info .di-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
 .dash-info .di-val{font-size:14px;font-weight:500;word-break:break-word}
+.stat-card.clk{cursor:pointer;transition:transform .12s,box-shadow .12s}
+.stat-card.clk:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+#bk-month-chip a{color:var(--blue);font-weight:600}
 .dash-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
 .dash-stats .stat-card{padding:16px 18px}
 .dash-stats .stat-card.stat-total{border:1.5px solid var(--blue-mid)}
@@ -335,6 +337,7 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
 <body>
 
 <div id="loading-overlay">
+  <div class="loading-brand">TRIX</div>
   <div class="spinner"></div>
 </div>
 
@@ -343,7 +346,7 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
 <!-- MAINTENANCE SCREEN (switched on from the backend page) -->
 <div class="maint-screen" id="maintenance">
   <div class="maint-box">
-    <div class="maint-icon">🛠️</div>
+    
     <h2>Under Maintenance</h2>
     <p id="maint-msg">We are performing scheduled maintenance. Please check back soon.</p>
   </div>
@@ -506,6 +509,7 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
 <div class="page" id="page-bookings">
   <div class="card" style="margin-top:22px">
     <div><div class="card-title">Bookings</div><div class="card-sub" id="bookings-sub" style="margin-bottom:0">All booking records</div></div>
+    <div id="bk-month-chip" style="display:none;margin-top:12px;padding:8px 12px;background:var(--blue-light);border-radius:var(--radius-sm);font-size:13px;color:var(--blue-dark)"></div>
     <div class="section-label" style="margin-top:16px">Search &amp; Filter</div>
     <div class="filters-bar">
       <input type="text" id="f-tid" placeholder="Tracking ID" oninput="renderBookingsTable()">
@@ -530,7 +534,7 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
         </button>
       </div>
     </div>
-    <div class="table-wrap" id="bookings-table-wrap"><div class="no-result"><div class="nr-icon">📋</div><p>Loading bookings…</p></div></div>
+    <div class="table-wrap" id="bookings-table-wrap"><div class="no-result"><p>Loading bookings…</p></div></div>
   </div>
 </div>
 
@@ -559,7 +563,7 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
       </div>
     </div>
     <div class="table-wrap" id="orders-table-wrap">
-      <div class="no-result"><div class="nr-icon">📋</div><p>Loading orders…</p></div>
+      <div class="no-result"><p>Loading orders…</p></div>
     </div>
   </div>
   <div id="history-detail"></div>
@@ -765,10 +769,10 @@ function renderBanner(id){
 function waNumber(n){ let d=String(n).replace(/\D/g,''); if(d.startsWith('0')) d='92'+d.slice(1); return d; }
 function renderHelp(){
   const c=siteSettings.contact, rows=[], inline=[];
-  if(c.phone){ rows.push(`<a href="tel:${esc(c.phone)}">📞 ${esc(c.phone)}</a>`); inline.push(`<a href="tel:${esc(c.phone)}">${esc(c.phone)}</a>`); }
-  if(c.whatsapp){ rows.push(`<a href="https://wa.me/${waNumber(c.whatsapp)}" target="_blank" rel="noopener">💬 WhatsApp</a>`); }
-  if(c.email){ rows.push(`<a href="mailto:${esc(c.email)}">✉️ ${esc(c.email)}</a>`); inline.push(`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`); }
-  if(c.hours){ rows.push(`<span>🕒 ${esc(c.hours)}</span>`); }
+  if(c.phone){ rows.push(`<a href="tel:${esc(c.phone)}">${esc(c.phone)}</a>`); inline.push(`<a href="tel:${esc(c.phone)}">${esc(c.phone)}</a>`); }
+  if(c.whatsapp){ rows.push(`<a href="https://wa.me/${waNumber(c.whatsapp)}" target="_blank" rel="noopener">WhatsApp</a>`); }
+  if(c.email){ rows.push(`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`); inline.push(`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`); }
+  if(c.hours){ rows.push(`<span>${esc(c.hours)}</span>`); }
   const dh=document.getElementById('drawer-help');
   if(dh){ dh.style.display=rows.length?'flex':'none'; dh.innerHTML=rows.length?'<div class="dh-title">Need help?</div>'+rows.join(''):''; }
   const lh=document.getElementById('login-help');
@@ -889,7 +893,7 @@ auth.onAuthStateChanged(async fbUser=>{
     document.getElementById('app').classList.remove('active');
     document.getElementById('auth-user').classList.add('active');
     setLoading(false);
-    showErr('login-err','Login failed: '+((e&&(e.code||e.message))||'unknown error'));
+    showErr('login-err','Login failed. Please check your internet connection and try again.');
     setBtnLoading('login-btn',false,'Login to TRIX');
   }
 });
@@ -999,17 +1003,23 @@ async function doLogout(){
 }
 
 function fbErr(e){
+  const code=(e&&e.code)||'';
   const m={
     'auth/invalid-email':'Invalid email address.',
-    'auth/user-not-found':'No account found with this email.',
-    'auth/wrong-password':'Incorrect password.',
+    'auth/user-not-found':'Incorrect email or password.',
+    'auth/wrong-password':'Incorrect email or password.',
+    'auth/invalid-credential':'Incorrect email or password.',
+    'auth/invalid-login-credentials':'Incorrect email or password.',
+    'auth/user-disabled':'This account has been disabled. Please contact support.',
     'auth/email-already-in-use':'This email is already registered.',
     'auth/weak-password':'Password is too weak.',
     'auth/too-many-requests':'Too many attempts. Please try again later.',
-    'auth/network-request-failed':'Network error. Please check your internet connection.',
-    'auth/invalid-credential':'Incorrect email or password.',
+    'auth/network-request-failed':'Network error. Please check your internet connection.'
   };
-  return (m[e.code]||e.message||'Something went wrong.')+(e.code?' ['+e.code+']':'');
+  if(m[code]) return m[code];
+  const msg=String((e&&e.message)||'');
+  if(/invalid[-_ ]login[-_ ]credentials|invalid[-_ ]credential|wrong[-_ ]password|user[-_ ]not[-_ ]found/i.test(msg)) return 'Incorrect email or password.';
+  return 'Something went wrong. Please try again.';
 }
 
 // ══════════════════════════════════════════
@@ -1043,14 +1053,24 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !isDesktop()) cl
 // ══════════════════════════════════════════
 //  DASHBOARD  (own profile + own delivered / in-transit counts)
 // ══════════════════════════════════════════
-const STATUS_ICONS={'Booked':'📝','Picked':'🙌','In-Transit':'🚚','Arrived at Destination':'📍','Out For Delivery':'🛵','Delivered':'✅','Consignee Refused':'🚫','Cancelled by Shipper':'❌','Delivery Failed':'⚠️','Re-Attempt':'🔁','Returned':'↩️','Return Delivered to Shipper':'📬'};
 const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+let bkMonth=null;      // when set (YYYY-MM) the Bookings page only shows that month - used by the dashboard boxes
+const monthKey = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+const curMonth = () => monthKey(new Date());
+const monthLabel = k => { const [y,m]=k.split('-'); return new Date(+y,+m-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'}); };
+function goStatus(s){
+  showPage('bookings'); clearFilters();
+  bkMonth=curMonth();
+  const fs=document.getElementById('f-status'); if(fs) fs.value=s||'';
+  renderBookingsTable();
+}
 function renderDashboard(){
   const box=document.getElementById('dashboard-content');
   if(!box||!currentUser) return;
   const pr=userProfile||{};
-  const mine=allParcels.filter(p=>p.userId===currentUser.uid);      // only this user's parcels
+  const mkey=curMonth();
+  const mine=getMyParcels().filter(p=>{ const bd=bookingDateOf(p); return bd && monthKey(bd)===mkey; });   // this month only
   const counts={}; mine.forEach(p=>{ counts[p.status]=(counts[p.status]||0)+1; });
   const cv = n => parcelsLoaded ? n : '…';
   const name=pr.name||'User';
@@ -1075,7 +1095,6 @@ function renderDashboard(){
       <div><div class="di-label">Email</div><div class="di-val">${esc(email)||notAdded}</div></div>
       <div><div class="di-label">Phone</div><div class="di-val">${pr.phone?esc(pr.phone):notAdded}</div></div>
       <div><div class="di-label">Address</div><div class="di-val">${pr.address?esc(pr.address):notAdded}</div></div>
-      <div><div class="di-label">Member Since</div><div class="di-val">${pr.createdAt?fmt(pr.createdAt):'—'}</div></div>
     </div>`;
 
   box.innerHTML=`
@@ -1089,11 +1108,11 @@ function renderDashboard(){
       </div>
       ${body}
     </div>
-    <div class="section-label" style="margin-top:6px">My Parcels</div>
+    <div class="section-label" style="margin-top:6px">My Parcels - ${esc(monthLabel(mkey))}</div>
     <div class="dash-stats">
-      <div class="stat-card stat-total"><div class="stat-icon" style="background:var(--blue-light)">📦</div><div class="stat-info"><div class="label">Total Parcels</div><div class="val">${cv(mine.length)}</div></div></div>
-      ${STATUSES.map(st=>`<div class="stat-card"><div class="stat-icon" style="background:rgba(0,0,0,.05)">${STATUS_ICONS[st.key]||'📦'}</div><div class="stat-info"><div class="label">${esc(st.key)}</div><div class="val">${cv(counts[st.key]||0)}</div></div></div>`).join('')}
-    </div></div>`;
+      <div class="stat-card clk stat-total" data-s="" onclick="goStatus(this.dataset.s)"><div class="stat-info"><div class="label">Total Parcels</div><div class="val">${cv(mine.length)}</div></div></div>
+      ${STATUSES.map(st=>`<div class="stat-card clk" data-s="${esc(st.key)}" onclick="goStatus(this.dataset.s)"><div class="stat-info"><div class="label">${esc(st.key)}</div><div class="val">${cv(counts[st.key]||0)}</div></div></div>`).join('')}
+    </div>`;
 }
 function startEditProfile(){ dashEditing=true; renderDashboard(); }
 function cancelEditProfile(){ dashEditing=false; renderDashboard(); }
@@ -1137,6 +1156,7 @@ function showPage(p){
   document.getElementById('page-'+p).classList.add('active');
   const nl=document.getElementById('nl-'+p);if(nl)nl.classList.add('active');
   document.getElementById('slip-section').style.display='none';
+  if(p==='bookings' && bkMonth){ bkMonth=null; const fs=document.getElementById('f-status'); if(fs) fs.value=''; }   // opening Bookings from the menu = everything again
   if(p==='bookings') renderBookingsTable();
   if(p==='history')  renderHistory();
   if(p==='dashboard') renderDashboard();
@@ -1254,11 +1274,11 @@ function clearBookForm(){
 function openTrackById(id){showPage('track');document.getElementById('track-input').value=id;trackParcel();}
 async function trackParcel(){
   const q=v('track-input').toUpperCase(),res=document.getElementById('track-result');
-  if(!q){res.innerHTML='<div class="no-result"><div class="nr-icon">🔍</div><p>Please enter a tracking ID.</p></div>';return;}
+  if(!q){res.innerHTML='<div class="no-result"><p>Please enter a tracking ID.</p></div>';return;}
   res.innerHTML='<div class="no-result"><div class="spinner" style="margin:0 auto;border-top-color:var(--blue);border-color:var(--border)"></div></div>';
   let p=allParcels.find(x=>x.id.toUpperCase()===q);
   if(!p){const snap=await db.ref('parcels/'+q).once('value');if(snap.exists()){p=snap.val();if(p.timeline&&!Array.isArray(p.timeline))p.timeline=Object.values(p.timeline).sort((a,b)=>new Date(a.time)-new Date(b.time));}}
-  if(!p){res.innerHTML=`<div class="no-result"><div class="nr-icon">📭</div><p>No parcel found for <strong>${q}</strong>.</p></div>`;return;}
+  if(!p){res.innerHTML=`<div class="no-result"><p>No parcel found for <strong>${q}</strong>.</p></div>`;return;}
   res.innerHTML=renderParcelCard(p,false);
 }
 function clearTrack(){document.getElementById('track-input').value='';document.getElementById('track-result').innerHTML='';}
@@ -1325,22 +1345,26 @@ function getFilteredBookings(){
     if(cy&&!p.sCity?.toLowerCase().includes(cy)&&!p.rCity?.toLowerCase().includes(cy))return false;
     if(st&&p.status!==st)return false;
     if(dt){ const bd=bookingDateOf(p); if(!bd||localDateStr(bd)!==dt) return false; }
+    if(bkMonth){ const bm=bookingDateOf(p); if(!bm||monthKey(bm)!==bkMonth) return false; }
     return true;
   });
 }
 function clearFilters(){
   ['f-tid','f-shipper','f-consignee','f-city','f-date'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   const fs=document.getElementById('f-status');if(fs)fs.value='';
+  bkMonth=null;
   renderBookingsTable();
 }
 function renderBookingsTable(){
   bkTableData=getFilteredBookings(); // FIX 2: always refresh bkTableData before export/print
   const sel=selectedSets.bk,wrap=document.getElementById('bookings-table-wrap');
   document.getElementById('bookings-sub').textContent=`Your bookings (${bkTableData.length})`;
+  const mc=document.getElementById('bk-month-chip');
+  if(mc){ if(bkMonth){ mc.style.display=''; mc.innerHTML='Showing '+esc(monthLabel(bkMonth))+' only &nbsp;<a href="#" onclick="bkMonth=null;renderBookingsTable();return false">Show all months</a>'; } else mc.style.display='none'; }
   document.getElementById('bk-count-label').textContent=`${bkTableData.length} record${bkTableData.length!==1?'s':''}`;
   const sc=sel.size,slbl=document.getElementById('bk-sel-label');
   sc>0?(slbl.style.display='',slbl.textContent=`(${sc} selected)`):slbl.style.display='none';
-  if(!bkTableData.length){wrap.innerHTML='<div class="no-result"><div class="nr-icon">📭</div><p>No bookings match your filters.</p></div>';return;}
+  if(!bkTableData.length){wrap.innerHTML='<div class="no-result"><p>No bookings match your filters.</p></div>';return;}
   const allChk=bkTableData.every(p=>sel.has(p.id));
   wrap.innerHTML=`<table class="wide"><thead><tr>
     <th class="th-check"><input type="checkbox" ${allChk?'checked':''} onchange="toggleAll('bk',this.checked)"></th>
@@ -1399,7 +1423,7 @@ function renderHistory(){
   if(cnt) cnt.textContent = `${pp.length} order${pp.length!==1?'s':''}`;
 
   if(!pp.length){
-    wrap.innerHTML='<div class="no-result"><div class="nr-icon">📦</div><p>No orders yet.</p><button class="btn btn-primary" style="margin-top:12px" onclick="showPage(\'book\')">Book Your First Parcel</button></div>';
+    wrap.innerHTML='<div class="no-result"><p>No orders yet.</p><button class="btn btn-primary" style="margin-top:12px" onclick="showPage(\'book\')">Book Your First Parcel</button></div>';
     return;
   }
 
@@ -1441,7 +1465,7 @@ function renderHistory(){
       <td>${pkr(p.value)}</td>
       <td>${badge(p.status)}</td>
       <td style="color:${getDeliveryDate(p)==='—'?'var(--muted)':'var(--green)'};font-weight:${getDeliveryDate(p)==='—'?'400':'600'}">${getDeliveryDate(p)}</td>
-      <td><button class="btn btn-secondary btn-xs" onclick="openSlipById('${p.id}')">🖨️ Slip</button></td>
+      <td><button class="btn btn-secondary btn-xs" onclick="openSlipById('${p.id}')">Slip</button></td>
     </tr>`).join('')}
     </tbody>
   </table>`;
@@ -1703,7 +1727,7 @@ function buildSlipsPrintDocument(parcels){
   </style></head><body>
   <div class="toolbar">
     <div class="tt">TRIX Slips — ${parcels.length} record${parcels.length!==1?'s':''} (3 per A4 page)</div>
-    <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+    <button class="print-btn" onclick="window.print()">Print</button>
   </div>
   ${pagesHtml}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
@@ -1737,8 +1761,8 @@ async function printSelectedSlips(){
 // ══════════════════════════════════════════
 
 // Returns the correct data set for a given namespace:
-//   'bk'  → apply current bookings-tab filters from allParcels
-//   'admin' → apply current admin-tab filters from allParcels
+//   'bk'  apply current bookings-tab filters from allParcels
+//   'admin' apply current admin-tab filters from allParcels
 // Then narrows to selected rows only (if any are checked).
 function getExportData(ns){
   // Rebuild from the live data so Export/Print work even before the table was opened
@@ -1752,6 +1776,7 @@ function getExportData(ns){
     if(cy&&!p.sCity?.toLowerCase().includes(cy)&&!p.rCity?.toLowerCase().includes(cy))return false;
     if(st&&p.status!==st)return false;
     if(dt){ const bd=bookingDateOf(p); if(!bd||localDateStr(bd)!==dt) return false; }
+    if(bkMonth){ const bm=bookingDateOf(p); if(!bm||monthKey(bm)!==bkMonth) return false; }
     return true;
   });
   bkTableData=data;
@@ -1821,7 +1846,7 @@ function printTable(ns){
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>
-  <button class="print-btn" onclick="window.print()">🖨️ Print Now</button>
+  <button class="print-btn" onclick="window.print()">Print Now</button>
   </body></html>`;
   const w=window.open('','_blank');
   if(!w){showToast('Popup blocked! Allow popups for this site and try again.','error');return;}
@@ -1921,6 +1946,26 @@ document.addEventListener('DOMContentLoaded', ()=>{
   attachSettingsListener();   // brand, menu, booking options... all come from the backend settings
   // onAuthStateChanged takes it from here
 });
+
+// ══════════════════════════════════════════
+//  AUTO LOGOUT after 15 minutes without activity  (+ dashboard resets when the month changes)
+// ══════════════════════════════════════════
+const IDLE_MS = 15*60*1000;
+let lastActive = Date.now(), _lastMonth = curMonth();
+['mousemove','mousedown','keydown','scroll','touchstart','click'].forEach(ev=>
+  document.addEventListener(ev,()=>{ lastActive=Date.now(); },{passive:true}));
+async function idleCheck(){
+  if(currentUser && Date.now()-lastActive > IDLE_MS){
+    await doLogout();
+    showErr('login-err','You were logged out after 15 minutes of inactivity. Please login again.');
+    lastActive=Date.now();
+  }
+  if(curMonth()!==_lastMonth){
+    _lastMonth=curMonth();
+    if(document.querySelector('.page.active')?.id==='page-dashboard' && !dashEditing) renderDashboard();
+  }
+}
+setInterval(idleCheck,15000);
 </script>
 </body>
 </html>
