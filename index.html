@@ -92,8 +92,6 @@ body.drawer-open .menu-btn{background:var(--blue-light);border-color:var(--blue-
 .drawer-item svg{width:19px;height:19px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .drawer-item:hover{background:var(--gray-light)}
 .drawer-item.active{background:var(--blue-light);color:var(--blue);font-weight:600}
-.drawer-item.admin{color:var(--purple)}
-.drawer-item.admin:hover,.drawer-item.admin.active{background:var(--purple-light);color:var(--purple)}
 .drawer-backdrop{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(17,24,39,.45);opacity:0;pointer-events:none;transition:opacity .25s;z-index:110}
 .app-shell{transition:margin-left .25s ease;min-height:100vh}
 @media(min-width:1024px){
@@ -112,11 +110,9 @@ body.drawer-open .menu-btn{background:var(--blue-light);border-color:var(--blue-
 .user-chip{cursor:pointer}
 .dash-head{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
 .dash-avatar{width:68px;height:68px;border-radius:50%;background:var(--blue);color:#fff;font-family:'Sora',sans-serif;font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.dash-avatar.admin{background:var(--purple)}
 .dash-id{flex:1;min-width:160px}
 .dash-name{font-family:'Sora',sans-serif;font-size:20px;font-weight:700;word-break:break-word}
 .role-badge{display:inline-block;margin-top:4px;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:var(--blue-light);color:var(--blue)}
-.role-badge.admin{background:var(--purple-light);color:var(--purple)}
 .dash-info{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px 24px;margin-top:20px;padding-top:20px;border-top:1px solid var(--border)}
 .dash-info .di-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
 .dash-info .di-val{font-size:14px;font-weight:500;word-break:break-word}
@@ -133,7 +129,6 @@ body.drawer-open .menu-btn{background:var(--blue-light);border-color:var(--blue-
 .nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .user-chip{display:flex;align-items:center;gap:7px;background:var(--gray-light);border-radius:20px;padding:5px 12px 5px 6px;font-size:13px}
 .user-avatar{width:26px;height:26px;border-radius:50%;background:var(--blue);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
-.admin-chip{background:var(--purple-light);color:var(--purple)}
 .logout-btn{background:none;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:6px 12px;cursor:pointer;font-size:12px;font-weight:500;color:var(--muted);transition:all .15s}
 .logout-btn:hover{border-color:var(--red);color:var(--red)}
 
@@ -291,10 +286,6 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
 .slip-footer{border-top:1px solid var(--border);padding-top:13px;text-align:center;font-size:11px;color:var(--muted)}
 .slip-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:13px;flex-wrap:wrap}
 
-/* ADMIN PANEL */
-.admin-panel{background:white;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px}
-.admin-panel-header{background:var(--purple-light);padding:14px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #e9e0ff}
-.admin-panel-header h3{font-size:15px;font-weight:700;color:var(--purple)}
 
 /* TOAST */
 .toast{position:fixed;bottom:24px;right:24px;background:#111827;color:white;padding:12px 20px;border-radius:var(--radius-sm);font-size:14px;box-shadow:var(--shadow-lg);z-index:9000;transform:translateY(80px);opacity:0;transition:all .3s;max-width:320px}
@@ -332,6 +323,48 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
   .filters-bar{flex-direction:column;align-items:stretch}
   .table-toolbar{flex-direction:column;align-items:flex-start}
 }
+
+/* PUBLIC TRACKING (no login) */
+.pb-screen{display:none;position:fixed;top:0;right:0;bottom:0;left:0;z-index:900;background:#eef2fb;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.pb-screen.active{display:block}
+.pb-nav{background:white;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5;box-shadow:0 1px 8px rgba(0,0,0,.06)}
+.pb-nav-in{max-width:960px;margin:0 auto;height:58px;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
+.pb-menu-btn{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:none;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;color:var(--text)}
+.pb-menu-btn:hover{background:var(--blue-light);border-color:var(--blue-mid);color:var(--blue)}
+.pb-menu-btn svg,.pb-item svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pb-hero{background:linear-gradient(135deg,var(--blue-xdark),var(--blue) 60%,var(--blue-bright));color:white;padding:44px 16px 84px;text-align:center}
+.pb-hero h1{font-size:clamp(26px,5vw,38px);letter-spacing:-.5px;margin-bottom:8px}
+.pb-hero p{opacity:.85;max-width:480px;margin:0 auto}
+.pb-wrap{max-width:760px;margin:-56px auto 30px;padding:0 16px}
+.pb-card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+.pb-row{display:flex;gap:10px;flex-wrap:wrap}
+.pb-row input{flex:1;min-width:200px;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;color:var(--text)}
+.pb-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.12)}
+.pb-btn{border:none;cursor:pointer;font-family:'Sora',sans-serif;font-weight:600;font-size:14px;border-radius:var(--radius-sm);padding:12px 22px;background:var(--blue);color:white}
+.pb-btn:hover{background:var(--blue-dark)}
+.pb-btn:disabled{opacity:.6;cursor:not-allowed}
+#pb-result{margin-top:18px}
+.pb-route{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.pb-city{flex:1}.pb-city b{display:block;font-family:'Sora',sans-serif;font-size:17px}.pb-city small{color:var(--muted);font-size:12px}
+.pb-line{flex:0 0 60px;height:2px;background:repeating-linear-gradient(90deg,var(--blue) 0 6px,transparent 6px 11px)}
+.pb-steps{display:flex;justify-content:space-between;position:relative;margin-bottom:26px}
+.pb-steps::before{content:"";position:absolute;top:14px;left:8.3%;right:8.3%;height:3px;background:var(--border)}
+.pb-fill{position:absolute;top:14px;left:8.3%;height:3px;background:var(--green)}
+.pb-step{flex:1;text-align:center;font-size:11px;color:var(--muted);position:relative;z-index:1;line-height:1.3}
+.pb-dot{width:29px;height:29px;border-radius:50%;background:white;border:3px solid var(--border);margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:12px;color:white}
+.pb-step.on{color:var(--text);font-weight:600}.pb-step.on .pb-dot{background:var(--green);border-color:var(--green)}
+.pb-step.now .pb-dot{box-shadow:0 0 0 5px var(--green-light)}
+.pb-foot{text-align:center;color:var(--muted);font-size:12.5px;padding:0 16px 28px}
+.pb-drawer{position:fixed;top:0;bottom:0;left:0;width:270px;max-width:82vw;background:white;z-index:950;transform:translateX(-100%);transition:transform .25s;box-shadow:var(--shadow-lg)}
+.pb-drawer.open{transform:none}
+.pb-dhead{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);height:58px}
+.pb-dlabel{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:16px 18px 6px;font-weight:600}
+.pb-item{display:flex;align-items:center;gap:12px;width:calc(100% - 20px);margin:0 10px;padding:12px;border:none;background:none;border-radius:var(--radius-sm);font:600 15px 'DM Sans',sans-serif;color:var(--text);cursor:pointer;text-align:left}
+.pb-item:hover{background:var(--blue-light);color:var(--blue)}
+.pb-bd{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.45);z-index:940;opacity:0;pointer-events:none;transition:opacity .25s}
+.pb-bd.open{opacity:1;pointer-events:auto}
+.pb-back{display:block;text-align:center;margin-top:14px;font-size:13px;color:var(--blue);font-weight:600;cursor:pointer;background:none;border:none;width:100%;font-family:'DM Sans',sans-serif}
+@media(max-width:480px){.pb-step{font-size:9.5px}.pb-line{flex-basis:30px}}
 </style>
 </head>
 <body>
@@ -353,7 +386,7 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
 </div>
 
 <!-- SINGLE AUTH SCREEN -->
-<div class="auth-screen active" id="auth-user">
+<div class="auth-screen" id="auth-user">
   <div class="auth-box">
     <div class="auth-logo">
       <div class="logo-mark" id="auth-logo-mark">
@@ -381,7 +414,35 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl
       </div>
     </div>
     <div id="login-help" style="display:none"></div>
+    <button class="pb-back" onclick="pbShowTracking()">&larr; Back to Track Parcel</button>
   </div>
+</div>
+
+<!-- PUBLIC TRACKING SCREEN (shown to visitors who are not logged in) -->
+<div class="pb-screen" id="pb-screen">
+  <div class="pb-nav"><div class="pb-nav-in">
+    <div class="nav-logo"><div class="logo-box nav-logo-box"><svg viewBox="0 0 28 28" fill="none"><path d="M7 10h8l3 5H7V10z" fill="white" opacity=".9"/><path d="M15 10l3 5h3l-2-5h-4z" fill="white" opacity=".6"/><circle cx="10" cy="18" r="2" fill="white"/><circle cx="18" cy="18" r="2" fill="white"/></svg></div><span class="logo-text">TRIX</span></div>
+    <button class="pb-menu-btn" onclick="pbDrawer(true)" aria-label="Open menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div></div>
+  <aside class="pb-drawer" id="pb-drawer" aria-label="Menu">
+    <div class="pb-dhead"><div class="nav-logo"><div class="logo-box nav-logo-box"><svg viewBox="0 0 28 28" fill="none"><path d="M7 10h8l3 5H7V10z" fill="white" opacity=".9"/><path d="M15 10l3 5h3l-2-5h-4z" fill="white" opacity=".6"/><circle cx="10" cy="18" r="2" fill="white"/><circle cx="18" cy="18" r="2" fill="white"/></svg></div><span class="logo-text">TRIX</span></div>
+      <button class="pb-menu-btn" onclick="pbDrawer(false)" aria-label="Close menu"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="pb-dlabel">Menu</div>
+    <button class="pb-item" onclick="pbOpenLogin()"><svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>Login</button>
+  </aside>
+  <div class="pb-bd" id="pb-bd" onclick="pbDrawer(false)"></div>
+  <header class="pb-hero">
+    <h1>Track Your Parcel</h1>
+    <p>Enter your TRIX tracking ID to see the latest status of your shipment. No login required.</p>
+  </header>
+  <main class="pb-wrap">
+    <div class="pb-card"><div class="pb-row">
+      <input type="text" id="pb-input" placeholder="Enter Tracking ID (e.g. TRX123456)" autocomplete="off" onkeydown="if(event.key==='Enter')pbTrack()">
+      <button class="pb-btn" id="pb-btn" onclick="pbTrack()">Track</button>
+    </div></div>
+    <div id="pb-result"></div>
+  </main>
+  <div class="pb-foot">&copy; TRIX Courier Services</div>
 </div>
 
 <!-- MAIN APP -->
@@ -596,9 +657,6 @@ const db   = firebase.database();
 // ══════════════════════════════════════════
 //  CONSTANTS
 // ══════════════════════════════════════════
-const ADMIN_EMAIL = 'admin@trix.com';          // fallback admin identity (admins are sent to the backend page)
-const BACKEND_PAGE = 'trix_admin.html';        // file name of the backend page (keep both files in the same folder)
-const PREVIEW = new URLSearchParams(location.search).has('preview');   // ?preview=1 lets an admin look at the customer site
 
 // ── LOGO ──────────────────────────────────
 // Your logo is embedded right here (no Firebase Storage needed), so it always
@@ -674,7 +732,6 @@ const fmtBookingDate = p => { const d=bookingDateOf(p); return d ? fmt(d) : '—
 const pkr  = n  => n>0?'PKR '+Number(n).toLocaleString():'—';
 const sCls = k  => (STATUSES.find(x=>x.key===k)||{cls:'b-booked'}).cls;
 const badge= s  => `<span class="badge ${sCls(s)}"><span class="badge-dot"></span>${s}</span>`;
-const isAdmin = ()=> userProfile?.role==='admin';
 
 function showErr(id,msg){const e=document.getElementById(id);if(e){e.textContent=msg;e.style.display='block'}}
 function hideErr(id){const e=document.getElementById(id);if(e)e.style.display='none'}
@@ -693,18 +750,6 @@ function setBtnLoading(id,on,lbl=''){
   b.disabled=on;if(lbl)b.textContent=on?'Please wait…':lbl;
 }
 
-// Sends an admin to the backend page - but first checks the file exists, so a missing
-// file shows a clear message instead of a "404 Not Found" page.
-async function goToBackend(){
-  // returns true when the browser is being sent to the backend page.
-  // If the backend page does not exist yet, the admin simply continues on this (user) site.
-  try{
-    const r=await fetch(BACKEND_PAGE,{method:'HEAD',cache:'no-store'});
-    if(r.status===404) return false;
-  }catch(e){ /* opened as a local file or offline - just try */ }
-  location.replace(BACKEND_PAGE);
-  return true;
-}
 
 // ══════════════════════════════════════════
 //  SITE SETTINGS — everything here is controlled from the backend page
@@ -721,7 +766,7 @@ const DEFAULT_SETTINGS = {
     cities:[],
     parcelTypes:[]
   },
-  access:{ registrationOpen:true, maintenance:false, maintenanceMessage:'We are performing scheduled maintenance. Please check back soon.' },
+  access:{ registrationOpen:true, maintenance:false, maintenanceMessage:'We are performing scheduled maintenance. Please check back soon.', idleMinutes:'15' },
   contact:{ phone:'', email:'', whatsapp:'', hours:'' }
 };
 let siteSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
@@ -801,9 +846,9 @@ function applySettings(){
   if(tabs[1]) tabs[1].style.display=s.access.registrationOpen?'':'none';
   const rn=document.getElementById('reg-closed-note'); if(rn) rn.style.display=s.access.registrationOpen?'none':'block';
   if(!s.access.registrationOpen) switchAuthTab('login');
-  // maintenance (an admin previewing with ?preview=1 can still see the site)
+  // maintenance
   const mt=document.getElementById('maintenance');
-  if(mt){ mt.style.display=(s.access.maintenance && !PREVIEW)?'flex':'none'; setText('maint-msg',s.access.maintenanceMessage); }
+  if(mt){ mt.style.display=s.access.maintenance?'flex':'none'; setText('maint-msg',s.access.maintenanceMessage); }
   renderHelp();
 }
 function attachSettingsListener(){
@@ -849,37 +894,33 @@ function populateStatusFilters(){
 async function handleAuthChange(fbUser){
   if(fbUser){
     currentUser=fbUser;
-    // Load profile from DB — role (admin/user) is stored there
+    // Load the customer profile from the database
     let snap=null;
     try{ snap=await db.ref('users/'+fbUser.uid).once('value'); }catch(e){ console.warn('Profile read failed:',e&&e.message); }
     if(snap && snap.exists()){
       userProfile=snap.val();
     } else {
-      // Fallback: if no DB profile but email matches admin — treat as admin
-      // This handles the case where admin was created in Firebase Console manually
-      userProfile={
-        name:'TRIX Admin',
-        email:fbUser.email,
-        role: fbUser.email.toLowerCase()===ADMIN_EMAIL ? 'admin' : 'user'
-      };
+      // no profile saved yet - basic customer profile
+      userProfile={ name:(fbUser.email||'Customer').split('@')[0], email:fbUser.email, role:'user' };
     }
-    // Admins work in the backend page - the customer site is for customers
-    if(isAdmin() && !PREVIEW){ if(await goToBackend()) return; }
     setLoading(false);
     document.getElementById('auth-user').classList.remove('active');
+    document.getElementById('pb-screen').classList.remove('active');
     document.getElementById('app').classList.add('active');
+    idleStart();
     setupUI();
     attachParcelsListener();
     attachProfileListener();
     initDrawer();
     showPage('dashboard');
   } else {
+    idleStop();
     currentUser=null;userProfile=null;allParcels=[];
     if(parcelsRef){parcelsRef.off();parcelsRef=null;}
     if(profileRef){profileRef.off();profileRef=null;}
     dashEditing=false; setDrawer(false);
     document.getElementById('app').classList.remove('active');
-    document.getElementById('auth-user').classList.add('active');
+    pbShowTracking();
     setLoading(false);
     // login button must be usable again after logout / failed login
     setBtnLoading('login-btn',false,'Login to TRIX');
@@ -891,7 +932,7 @@ auth.onAuthStateChanged(async fbUser=>{
     console.error('Login error:',e);
     try{ await auth.signOut(); }catch(_){}
     document.getElementById('app').classList.remove('active');
-    document.getElementById('auth-user').classList.add('active');
+    pbOpenLogin();
     setLoading(false);
     showErr('login-err','Login failed. Please check your internet connection and try again.');
     setBtnLoading('login-btn',false,'Login to TRIX');
@@ -943,6 +984,78 @@ function attachParcelsListener(){
 }
 
 // ══════════════════════════════════════════
+//  PUBLIC TRACKING (visitors, no login)
+// ══════════════════════════════════════════
+const PB_STEPS=[['Booked','Booked'],['Picked','Picked Up'],['In-Transit','In Transit'],['Arrived at Destination','Arrived'],['Out For Delivery','Out for Delivery'],['Delivered','Delivered']];
+function pbDrawer(o){document.getElementById('pb-drawer').classList.toggle('open',o);document.getElementById('pb-bd').classList.toggle('open',o);}
+function pbShowTracking(){
+  pbDrawer(false);
+  document.getElementById('auth-user').classList.remove('active');
+  document.getElementById('pb-screen').classList.add('active');
+}
+function pbOpenLogin(){
+  pbDrawer(false);
+  document.getElementById('pb-screen').classList.remove('active');
+  document.getElementById('auth-user').classList.add('active');
+}
+async function pbTrack(){
+  const q=(document.getElementById('pb-input').value||'').trim().toUpperCase().replace(/\s+/g,''),res=document.getElementById('pb-result'),btn=document.getElementById('pb-btn');
+  if(!q){res.innerHTML='<div class="pb-card no-result"><p>Please enter a tracking ID.</p></div>';return;}
+  if(!/^[A-Z0-9-]{3,40}$/.test(q)){res.innerHTML=`<div class="pb-card no-result"><p>No parcel found for <strong>${esc(q)}</strong>.<br>Please check the ID and try again.</p></div>`;return;}
+  btn.disabled=true;
+  res.innerHTML='<div class="pb-card no-result"><div class="spinner" style="margin:0 auto;border-top-color:var(--blue);border-color:var(--border)"></div></div>';
+  try{
+    const snap=await db.ref('publicTracking/'+q).once('value');
+    if(!snap.exists()){res.innerHTML=`<div class="pb-card no-result"><p>No parcel found for <strong>${esc(q)}</strong>.<br>Please check the ID and try again.</p></div>`;return;}
+    res.innerHTML=pbRender(snap.val(),q);
+  }catch(e){
+    console.warn('Public track failed:',e&&e.message);
+    res.innerHTML='<div class="pb-card no-result"><p>Tracking is temporarily unavailable. Please try again later.</p></div>';
+  }finally{btn.disabled=false;}
+}
+function pbRender(p,q){
+  // only non-private fields are shown here: status, cities, booking date, timeline
+  const tl=Array.isArray(p.timeline)?p.timeline:Object.values(p.timeline||{});
+  tl.sort((a,b)=>new Date(a.time)-new Date(b.time));
+  const idx=PB_STEPS.findIndex(s=>s[0]===p.status);
+  let bar='';
+  if(idx>=0){
+    const steps=PB_STEPS.map((s,i)=>`<div class="pb-step${i<=idx?' on':''}${i===idx?' now':''}"><div class="pb-dot">${i<=idx?'✓':''}</div>${s[1]}</div>`).join('');
+    bar=`<div class="pb-steps"><div class="pb-fill" style="width:${idx/(PB_STEPS.length-1)*83.4}%"></div>${steps}</div>`;
+  }
+  const tlHtml=tl.slice().reverse().map((t,i)=>`
+    <div class="timeline-item ${i===0?'tlactive':'tldone'}">
+      <div class="tl-dot ${i===0?'tlactive':'tldone'}"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2"/></svg></div>
+      <div class="tl-content"><div class="tl-status">${esc(t.status)}</div><div class="tl-time">${fmtDT(t.time)}</div></div>
+    </div>`).join('');
+  return `<div class="parcel-detail" style="margin-top:0">
+    <div class="pd-header">
+      <div>
+        <div style="font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">TRIX Tracking ID</div>
+        <div class="pd-id">${esc(p.id||q)}</div>
+        <div style="margin-top:8px">${badge(esc(p.status))}</div>
+      </div>
+      <div style="text-align:right"><div style="font-size:11px;opacity:.7;margin-bottom:3px">Booked</div><div style="font-size:13px">${fmtBookingDate(p)}</div></div>
+    </div>
+    <div class="pd-body">
+      <div class="pb-route">
+        <div class="pb-city"><small>From</small><b>${esc(p.sCity||'—')}</b></div><div class="pb-line"></div>
+        <div class="pb-city" style="text-align:right"><small>To</small><b>${esc(p.rCity||'—')}</b></div>
+      </div>
+      ${bar}
+      <div class="timeline"><div class="timeline-title">Shipment Timeline</div>${tlHtml||'<div class="tl-time">No updates yet.</div>'}</div>
+    </div>
+  </div>`;
+}
+// open straight from a link like  ?track=TRX123456
+(function(){
+  try{
+    const id=new URLSearchParams(location.search).get('track');
+    if(id){ const i=document.getElementById('pb-input'); i.value=id; const t=setInterval(()=>{ if(document.getElementById('pb-screen').classList.contains('active')){clearInterval(t);pbTrack();} },300); setTimeout(()=>clearInterval(t),8000); }
+  }catch(e){}
+})();
+
+// ══════════════════════════════════════════
 //  AUTH FUNCTIONS
 // ══════════════════════════════════════════
 function switchAuthTab(t){
@@ -952,7 +1065,7 @@ function switchAuthTab(t){
   const f=document.getElementById('form-login'); if(f) f.classList.add('active');
 }
 
-// UNIFIED LOGIN — works for both Admin and regular User
+// LOGIN
 // System automatically detects role from Firebase DB profile
 async function doLogin(){
   const email=v('login-email'),pass=document.getElementById('login-pass').value;
@@ -960,6 +1073,7 @@ async function doLogin(){
   hideErr('login-err');
   setBtnLoading('login-btn',true,'Login to TRIX');
   try{
+    idleTouch(true);
     await auth.signInWithEmailAndPassword(email.trim(),pass);
     setTimeout(()=>{ const a=document.getElementById('auth-user');
       if(a && a.classList.contains('active') && !document.getElementById('login-err').textContent){
@@ -990,6 +1104,42 @@ async function doRegister(){
     setBtnLoading('reg-btn',false,'Create Account');
   }
 }
+
+// ══════════════════════════════════════════
+//  AUTO LOGOUT AFTER INACTIVITY
+//  Time (minutes) is set in the admin panel: Settings → Access. 0 = never.
+// ══════════════════════════════════════════
+const IDLE_KEY='trix_last_activity';
+const IDLE_EVTS=['mousemove','mousedown','keydown','touchstart','scroll','click'];
+let idleOn=false, idleTimer=null, idleLastWrite=0;
+function idleMinutes(){
+  const n=parseInt(siteSettings&&siteSettings.access&&siteSettings.access.idleMinutes,10);
+  return isNaN(n)?15:Math.max(0,n);
+}
+function idleTouch(force){
+  const now=Date.now(); if(!force && now-idleLastWrite<2000) return;
+  idleLastWrite=now; try{ localStorage.setItem(IDLE_KEY,String(now)); }catch(e){}
+}
+function idleLast(){
+  try{ const t=parseInt(localStorage.getItem(IDLE_KEY),10); if(t) return t; }catch(e){}
+  return idleLastWrite||Date.now();
+}
+async function idleCheck(){
+  if(!idleOn) return;
+  const m=idleMinutes(); if(!m) return;
+  if(Date.now()-idleLast()>=m*60000){
+    idleStop();
+    showToast('You were logged out after '+m+' minutes of inactivity.');
+    try{ await doLogout(); }catch(e){ console.warn(e); }
+  }
+}
+function idleStart(){
+  if(idleOn) return; idleOn=true;
+  IDLE_EVTS.forEach(ev=>window.addEventListener(ev,()=>idleTouch(false),{passive:true}));
+  idleTimer=setInterval(idleCheck,10000);
+  idleCheck();   // a saved login that was left idle for too long is logged out right away
+}
+function idleStop(){ idleOn=false; if(idleTimer){clearInterval(idleTimer);idleTimer=null;} }
 
 async function doLogout(){
   if(parcelsRef){parcelsRef.off();parcelsRef=null;}
@@ -1030,7 +1180,6 @@ function setupUI(){
   document.getElementById('user-avatar').textContent=name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
   document.getElementById('user-name-display').textContent=name.split(' ')[0];
   const chip=document.getElementById('user-chip');
-  isAdmin()?chip.classList.add('admin-chip'):chip.classList.remove('admin-chip');
 }
 
 // ══════════════════════════════════════════
@@ -1077,7 +1226,6 @@ function renderDashboard(){
   const initials=name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
   const email=pr.email||currentUser.email||'';
   const notAdded='<span style="color:var(--muted)">Not added</span>';
-  const adminCls=isAdmin()?' admin':'';
 
   const body = dashEditing ? `
     <div class="form-grid" style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border)">
@@ -1100,10 +1248,10 @@ function renderDashboard(){
   box.innerHTML=`
     <div class="card">
       <div class="dash-head">
-        <div class="dash-avatar${adminCls}">${esc(initials)}</div>
+        <div class="dash-avatar">${esc(initials)}</div>
         <div class="dash-id">
           <div class="dash-name">${esc(name)}</div>
-          <span class="role-badge${adminCls}">${isAdmin()?'Admin':'User'}</span>
+          <span class="role-badge">Customer</span>
         </div>
       </div>
       ${body}
@@ -1168,7 +1316,7 @@ function showPage(p){
 //  BOOKING
 // ══════════════════════════════════════════
 // Returns only parcels belonging to the logged-in user.
-// Admin sees ALL. Regular user sees ONLY their own (strict userId match).
+// A customer sees ONLY their own parcels (strict userId match).
 function getMyParcels(){
   if(!currentUser) return [];
   return allParcels.filter(p => p.userId === currentUser.uid);
@@ -1250,6 +1398,9 @@ async function bookParcel(){
       status:'Booked',timeline:[{status:'Booked',time:now}],createdAt:now,bookingDate:localDateStr(now)
     };
     await db.ref('parcels/'+tid).set(parcel);
+    // public copy: only non-private fields (no phone / address / amount / value)
+    try{ await db.ref('publicTracking/'+tid).set(publicCopy(parcel)); }
+    catch(pe){ console.warn('Public tracking copy failed:',pe&&pe.message); }
     clearBookForm();
     al.className='alert alert-success show';
     al.innerHTML=`<strong>Parcel Booked!</strong> Tracking ID: <span class="tracking-id">${tid}</span>
@@ -1260,6 +1411,12 @@ async function bookParcel(){
     showToast('Parcel booked successfully!','success');
   }catch(e){al.className='alert alert-error show';al.innerHTML='<strong>Error:</strong> '+e.message;}
   setBtnLoading('book-btn',false,'Book Parcel');
+}
+function publicCopy(p){
+  const tl=Array.isArray(p.timeline)?p.timeline:Object.values(p.timeline||{});
+  return { id:p.id, status:p.status||'Booked', sCity:p.sCity||'', rCity:p.rCity||'',
+           bookingDate:p.bookingDate||'', createdAt:p.createdAt||'',
+           timeline:tl.map(t=>({status:t.status||'',time:t.time||''})) };
 }
 function clearBookForm(){
   ['sName','sPhone','sAddr','rName','rPhone','rAddr','weight','svcAmount','parcelValue','notes','itemDesc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
@@ -1858,7 +2015,7 @@ function printTable(ns){
 // ══════════════════════════════════════════
 //  SLIP WITH QR
 // ══════════════════════════════════════════
-// Every "Slip" / "Print Slip" button (History, Bookings, Track, Admin) comes here.
+// Every "Slip" / "Print Slip" button (History, Bookings, Track) comes here.
 // It prints the compact label directly — it no longer opens the big full-page preview.
 async function openSlipById(parcelId){
   return printSlip(parcelId);
